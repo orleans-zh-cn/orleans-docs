@@ -1,0 +1,7 @@
+files:
+  - source: '*.md'
+    translation: '%original_path%/%original_file_name%'
+  - source: '*.yml'
+    ignore:
+      - .github/
+    translation: '%original_path%/%original_file_name%'
