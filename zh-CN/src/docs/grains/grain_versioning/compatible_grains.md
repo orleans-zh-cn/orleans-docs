@@ -1,39 +1,39 @@
-# 兼容Grains
+# Compatible grains
 
-当现有的Grains激活将要处理请求时，运行时将检查请求中的版本与Grains的实际版本是否兼容。 **Orleans不会在运行时推断要使用哪个策略**，确定两个版本是否兼容的默认行为由`GrainVersioningOptions.CompatibilityStrategy`
+When an existing grain activation is about to process a request, the runtime will check if the version in the request and the actual version of the grain are compatible. __Orleans does not infer at runtime which policy to use__, The default behavior to determine if two versions are compatible is determined by `GrainVersioningOptions.CompatibilityStrategy`
 
-## 向后兼容(默认)
+## Backward compatible (default)
 
-### 定义
+### Definition
 
-如果满足以下条件，则Grain接口版本Vn可以与Vm向后兼容：
+A grain interface version Vn can be be backward compatible with Vm if:
 
-  - 接口名称未更改(或覆盖的类型代码)
-  - Vm版本中存在的所有公共方法都在Vn版本中。 **重要的是，不要修改从Vm继承的方法的签名。 **：由于Orleans使用内部内置的序列化程序，因此修改/重命名字段(甚至私有)可能会使序列化中断。
+  - The name of the interface didn't change (or the overridden typecode)
+  - All public methods present in the Vm version are in the Vn version. __It is important that the signatures of the methods inherited from Vm are not modified__: since Orleans use an internal built-in serializer, modifying/renaming a field (even private) can make the serialization to break.
 
-由于Vn与Vm相比可以增加其他方法，因此Vm与Vn不兼容。
+Since Vn can have added methods compared to Vm, Vm is not compatible with Vn.
 
-### 例
+### Example
 
-如果在集群中，给定接口有两个版本，即V1和V2，并且该V2向后兼容V1：
+If in the cluster we have two versions of a given interface, V1 and V2 and that V2 is backward compatible with V1:
 
-  - 如果当前激活为V2，而请求的版本为V1，则当前激活将能够正常处理请求
-  - 如果当前激活为V1，而请求的版本为V2，则将取消激活当前激活，并创建与V2兼容的新激活(请参见[版本选择器策略](version_selector_strategy.md))。
+  - If the current activation is a V2 and the requested version is V1, the current activation will be able to process the request normally
+  - If the current activation is a V1 and the requested version is V2, the current activation will be deactivated and a new activation compatible with V2 will be created (see [version selector strategy](version_selector_strategy.md)).
 
-## 完全兼容
+## Fully compatible
 
-### 定义
+### Definition
 
-如果满足以下条件，则Grains接口版本Vn可以与Vm完全兼容：
+A grain interface version Vn can be fully compatible with Vm if:
 
-  - Vn与Vm向后兼容
-  - 在Vn版本中未添加任何公共方法
+  - Vn is backward compatible with Vm
+  - No public methods where added in the Vn version
 
-如果Vn与Vm完全兼容，则Vm也与Vn完全兼容。
+If Vn is fully compatible with Vm then Vm is also fully compatible with Vn.
 
-### 例
+### Example
 
-如果在集群中，给定接口有两个版本，即V1和V2，并且该V2与V1完全兼容：
+If in the cluster we have two versions of a given interface, V1 and V2 and that V2 is fully compatible with V1:
 
-  - 如果当前激活为V2，而请求的版本为V1，则当前激活将能够正常处理请求
-  - 如果当前激活为V1，而请求的版本为V2，则当前激活也将能够正常处理请求
+  - If the current activation is a V2 and the requested version is V1, the current activation will be able to process the request normally
+  - If the current activation is a V1 and the requested version is V2, the current activation will also be able to process the request normally
