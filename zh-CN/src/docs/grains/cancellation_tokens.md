@@ -5,27 +5,27 @@ title: Grain cancellation tokens
 
 # Grain cancellation tokens
 
-The Orleans runtime provides mechanism called grain cancellation token, that enables the developer to cancel an executing grain operation.
+orleans运行时提供了一种称为grain cancellation token的机制，使开发人员能够取消正在执行的grain操作。
 
 
-## Description
-**GrainCancellationToken** is a wrapper around standard **.NET System.Threading.CancellationToken**, which enables cooperative cancellation between threads, thread pool work items or Task objects, and can be passed as grain method argument.
+## 说明
+**GrainCancellationToken**是标准的包装**.NET System.Threading.CancellationToken**，它启用线程、线程池工作项或任务对象之间的协作取消，并且可以作为grain方法参数传递。
 
-A **GrainCancellationTokenSource** is a object that provides a cancellation token through its Token property and sends a cancellation message by calling its  `Cancel` method.
+一个**GrainCancellationTokenSource**是通过其token属性提供取消令牌并通过调用`取消`方法。
 
-## Usage
+## 用法
 
-* Instantiate a CancellationTokenSource object, which manages and sends cancellation notification to the individual cancellation tokens.
+* 实例化CancellationTokenSource对象，该对象管理并向各个取消令牌发送取消通知。
 
 ``` csharp
         var tcs = new GrainCancellationTokenSource();
 ```
-* Pass the token returned by the GrainCancellationTokenSource.Token property to each grain method that listens for cancellation.
+* 将GrainCancellationTokenSource.Token属性返回的令牌传递给侦听取消的每个Grain方法。
 
 ``` csharp
         var waitTask = grain.LongIoWork(tcs.Token, TimeSpan.FromSeconds(10));
 ```
-* A cancellable grain operation needs to handle underlying **CancellationToken** property of **GrainCancellationToken** just like it would do in any other .NET code.
+* 可取消的Grains操作需要处理底层**GrainCancellationToken**属性的**CancellationToken**就像在其他.NET代码中一样。
 
 ``` csharp
         public async Task LongIoWork(GrainCancellationToken tc, TimeSpan delay)
@@ -36,21 +36,21 @@ A **GrainCancellationTokenSource** is a object that provides a cancellation toke
             }
         }
 ```
-* Call the `GrainCancellationTokenSource.Cancel` method to initiate cancellation.
+* 调用给`GrainCancellationTokenSource.Cancel`方法启动取消。
 
 ``` csharp
         await tcs.Cancel();
 ```
-* Call the `Dispose` method when you are finished with the **GrainCancellationTokenSource** object.
+* 当使用完**GrainCancellationTokenSource**对象调用`Dispose`方法。
 
 ``` csharp
         tcs.Dispose();
 ```
 
 
- #### Important Considerations:
+ 重要注意事项：
 
-* The `GrainCancellationTokenSource.Cancel` method returns **Task**, and in order to ensure cancellation the cancel call must be retried in case of transient communication failure.
-* Callbacks registered in underlying **System.Threading.CancellationToken** are subjects to single threaded execution guarantees within the grain activation on which they were registered.
-* Each **GrainCancellationToken** can be passed through multiple methods invocations. 
+* 这个`GrainCancellationTokenSource.Cancel`方法返回**Task**，并且为了确保取消，必须在短暂通信失败的情况下重试取消调用。
+* 在基础中注册的回调**System.Threading.CancellationToken**在注册它们的grain 激活中受单线程执行保证的约束。
+* 每个**GrainCancellationToken**可以通过多个方法调用传递。 
 
