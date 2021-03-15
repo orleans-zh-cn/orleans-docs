@@ -1,41 +1,39 @@
-# grains接口版本控制
+# Grain Interface Versioning
 
-> [!警告]本页介绍如何使用Grain接口版本控制。 Grain状态的版本控制超出范围。
+> [!WARNING] This page describes how to use grain interface versioning. The versioning of Grain state is out of scope.
 
-## 概述
-在给定的集群上，silos可以支持不同版本的Grains类型。 ![Cluster with different versions of a grain](version.png)在本例中，客户端和silos{1,2,3}是用grain接口编译的`A`版本1。 silos4是用`A`版本2。
+## Overview
+On a given cluster, silos can support different versions of a grain type. ![Cluster with different versions of a grain](version.png) In this example the client and Silo{1,2,3} were compiled with grain interface `A` version 1. Silo 4 was compiled with `A` version 2.
 
-## 限制：
--   无状态工作进程
--   流接口没有版本控制
+## Limitations:
+-   No versioning on stateless worker
+-   Streaming interfaces are not versioned
 
-## 启用版本控制
-默认情况下，不会对grains进行版本控制。 您可以使用grain接口上的VersionAttribute来设置grain版本：
+## Enable versioning
+If the version attribute is not explicitly added to the grain interface, then the grains have a default version of 0. You can version grain by using the VersionAttribute on the grain interface:
 
 ``` cs
 [Version(X)]
 public interface IVersionUpgradeTestGrain : IGrainWithIntegerKey {}
 ```
 
-`十`是grains接口的版本号，通常单调递增。
+Where `X` is the version number of the grain interface, which is typically monotonically increasing.
 
-## grains版本兼容性和存储
-当来自版本控制的grain的调用到达集群时：
-- 如果不存在激活，将创建兼容的激活
-- 如果激活存在：
-  - 如果当前的不兼容，它将被停用并创建新的兼容的(请参阅[版本选择器策略](version_selector_strategy.md))
-  - 如果当前版本兼容(请参见[相容grains](compatible_grains.md))，访问将正常处理。
+## Grain version compatibility and placement
+When a call from a versioned grain arrives in a cluster:
+- If no activation exists, a compatible activation will be created
+- If an activation exists:
+  - If the current one is not compatible, it will be deactivated and new compatible one will be created (see [version selector strategy](version_selector_strategy.md))
+  - If the current one is compatible (see [compatible grains](compatible_grains.md)), the call will be handled normally.
 
-默认情况下：
-- 所有版本化的grains只能向后兼容(参见[向后兼容准则](backward_compatibility_guidelines.md)和[相容grains](compatible_grains.md)). 这意味着v1grains可以调用v2grains，但v2grains不能调用v1。 That means that a v1 grain can make calls to a v2 grain, but a v2 grain cannot call a v1.
-- 当集群中存在多个版本时，新的激活将随机存储在兼容的silos上。
+By default:
+- All versioned grains are supposed to be backward-compatible only (see [backward compatibility guidelines](backward_compatibility_guidelines.md) and [compatible grains](compatible_grains.md)). That means that a v1 grain can make calls to a v2 grain, but a v2 grain cannot call a v1.
+- When multiple versions exist in the cluster, the new activation will be randomly placed on a compatible silo.
 
-您可以通过选项更改此默认行为`GrainVersioning选项`:
+You can change this default behavior via the option `GrainVersioningOptions`:
 
 ```csharp
 var silo = new SiloHostBuilder()
-  [...]
-  var silo = new SiloHostBuilder()
   [...]
   .Configure<GrainVersioningOptions>(options => 
   {
