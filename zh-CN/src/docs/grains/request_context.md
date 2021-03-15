@@ -5,28 +5,28 @@ title: Request Context
 
 # Request Context
 
-RequestContext是一个Orleans特性，它允许应用程序元数据(如跟踪ID)与请求一起流动。 应用程序元数据可以添加到客户端上；它将与Orleans请求一起流向接收Grain。
+RequestContext is an Orleans feature that allows application metadata, such as a trace ID, to flow with requests. Application metadata may be added on the client; it will flow with Orleans requests to the receiving grain.
 
- 该特性由Orleans名称空间中的一个公共静态类RequestContext实现。 此类公开了两个简单方法：
+ The feature is implemented by a public static class, RequestContext, in the Orleans namespace. This class exposes two simple methods:
 
-**void Set(string key, object value)**用于在请求上下文中存储值。 该值可以是任何可序列化类型。 **Object Get(string key)**用于从当前请求上下文中检索值。
+**void Set(string key, object value)** is used to store a value in the request context. The value can be any Serializable type. **Object Get(string key)** is used to retrieve a value from the current request context.
 
- RequestContext的后台存储是线程静态的。 当一个线程(无论是客户端还是在Orleans内)发送请求时，发送线程的RequestContext的内容都包含在请求的Orleans消息中；当grain代码接收到请求时，可以从本地RequestContext访问该元数据。 如果grain代码没有修改RequestContext，那么它请求的任何grain都将接收相同的元数据，依此类推。
+ The backing storage for RequestContext is thread-static. When a thread (whether client-side or within Orleans) sends a request, the contents of the sending thread’s RequestContext is included with the Orleans message for the request; when the grain code receives the request, that metadata is accessible from the local RequestContext. If the grain code does not modify the RequestContext, then any grain it makes a request to will receive the same metadata, and so on.
 
- 当您使用StartNew或ContinueWith计划未来的计算时，也会维护应用程序元数据；在这两种情况下，后续的任务将使用与调度代码在调度计算时所具有的相同元数据执行(即，系统复制当前元数据并将其传递给后续任务，因此，调用StartNew或ContinueWith之后的更改将不会被后续任务看到)。
+ Application metadata also is maintained when you schedule a future computation using StartNew or ContinueWith; in both cases, the continuation will execute with the same metadata as the scheduling code had at the moment the computation was scheduled (that is, the system makes a copy of the current metadata and passes it to the continuation, so changes after the call to StartNew or ContinueWith will not be seen by the continuation).
 
- 请注意，应用程序元数据不会随响应返回；也就是说，由于接收到响应而运行的代码，无论是在ContinueWith 后续任务中，还是在调用Wait或GetValue之后，仍将在原始请求设置的当前上下文中运行。
+ Note that application metadata does not flow back with responses; that is, code that runs as a result of a response being received, either within a ContinueWith continuation or after a call to Wait or GetValue, will still run within the current context that was set by the original request.
 
- 例如，要将客户端中的跟踪ID设置为新的GUID，只需调用：
+ For example, to set a trace ID in the client to a new GUID, one would simply call:
 
 ``` csharp
 RequestContext.Set("TraceId", new Guid());
 ```
 
-在grain代码(或在Orleans内运行的调度程序线程上的其他代码)中，可以使用原始客户端请求的跟踪ID，例如，在编写日志时：
+Within grain code (or other code that runs within Orleans on a scheduler thread), the trace ID of the original client request could be used, for instance, when writing a log:
 
 ``` csharp
 Logger.Info("Currently processing external request {0}", RequestContext.Get("TraceId"));
 ```
 
-虽然任何可序列化的对象都可以作为应用程序元数据发送，但值得一提的是，大型或复杂的对象可能会给消息序列化时间增加显著的开销。 因此，建议使用简单类型(字符串、guid或数字类型)。
+While any serializable object may be sent as application metadata, it’s worth mentioning that large or complex objects may add noticeable overhead to message serialization time. For this reason, the use of simple types (strings, GUIDs, or numeric types) is recommended.
