@@ -3,52 +3,52 @@ layout: page
 title: JournaledGrain API
 ---
 
-# 日志训练基础
+# JournaledGrain Basics
 
-日记grains来源于`<journaledgrain<statetype，事件类型>`，具有以下类型参数：
+Journaled grains derive from `JournaledGrain<StateType,EventType>`, with the following type parameters:
 
-* 这个`状态类型`表示Grains的状态。 它必须是具有公共默认构造函数的类。
-* `事件类型`是可为此Grain引发的所有事件的通用父类型，可以是任何类或接口。
+* The `StateType` represents the state of the grain. It must be a class with a public default constructor.
+* `EventType` is a common supertype for all the events that can be raised for this grain, and can be any class or interface.
 
-所有状态和事件对象都应该是可序列化的(因为日志一致性提供程序可能需要持久化它们，和/或在通知消息中发送它们)。
+All state and event objects should be serializable (because the log-consistency providers may need to persist them, and/or send them in notification messages).
 
-对于事件是pocos(普通的旧c对象)的Grains，`日志记录<statetype>`可用作`journaledgrain<statetype，对象>`是的。
+For grains whose events are POCOs (plain old C# objects),  `JournaledGrain<StateType>` can be used as a shorthand for `JournaledGrain<StateType,Object>`.
 
-## 解读grain状况
+## Reading the Grain State
 
-要读取当前grains状态并确定其版本号，journaledgrain具有属性
+To read the current grain state, and determine its version number, the JournaledGrain has properties
 
 ```csharp
 GrainState State { get; }
 int Version { get; }
 ```
 
-版本号始终等于已确认事件的总数，状态是将所有已确认事件应用于初始状态的结果。 初始状态的版本为0(因为没有应用任何事件)，由grainstate类的默认构造函数确定。
+The version number is always equal to the total number of confirmed events, and the state is the result of applying all the confirmed events to the initial state. The initial state, which has version 0 (because no events have been applied to it), is determined by the default constructor of the GrainState class.
 
-*重要：*应用程序不应直接修改`State`是的。 这本书仅供阅读。 相反，当应用程序想要修改状态时，它必须通过引发事件间接地进行修改。
+_Important:_ The application should never directly modify the object returned by `State`. It is meant for reading only. Rather, when the application wants to modify the state, it must do so indirectly by raising events.
 
-## 引发事件
+## Raising Events
 
-通过调用`葡萄干`功能。 例如，一个代表聊天的Grains可以引发`后遗症`要指示用户提交了帖子，请执行以下操作：
+Raising events is accomplished by calling the `RaiseEvent` function. For example, a grain representing a chat can raise a `PostedEvent` to indicate that a user submitted a post:
 
 ```csharp
 RaiseEvent(new PostedEvent() { Guid = guid, User = user, Text = text, Timestamp = DateTime.UtcNow });
 ```
 
-请注意`葡萄干`启动对存储的写入访问，但不等待写入完成。 对于许多应用程序，必须等到我们确认事件已被持久化。 在这种情况下，我们总是等待`证实人`以下内容：
+Note that `RaiseEvent` kicks off a write to storage access, but does not wait for the write to complete. For many applications, it is important to wait until we have confirmation that the event has been persisted. In that case, we always follow up by waiting for `ConfirmEvents`:
 
 ```csharp
 RaiseEvent(new DepositTransaction() { DepositAmount = amount, Description = description });
 await ConfirmEvents();
 ```
 
-请注意，即使您没有显式调用`证实人`，事件最终将得到确认-它在后台自动发生。
+Note that even if you don't explicitly call `ConfirmEvents`, the events will eventually be confirmed - it happens automatically in the background.
 
-## 状态转换方法
+## State Transition Methods
 
-运行时更新Grains状态*自动*每当事件发生时。 应用程序不需要在引发事件后显式更新状态。 但是，应用程序仍然必须提供指定*怎样*更新状态以响应事件。 这可以通过两种方式来实现。
+The runtime updates the grain state _automatically_ whenever events are raised. There is no need for the application to explicitly update the state after raising an event. However, the application still has to provide the code that specifies _how_ to update the state in response to an event. This can be done in two ways.
 
-**(一)**grainstate类可以实现一个或多个`应用`方法论`状态类型`是的。 通常，会创建多个重载，并为事件的运行时类型选择最接近的匹配：
+**(a)** The GrainState class can implement one or more `Apply` methods on the `StateType`. Typically, one would create multiple overloads, and the closest match is chosen for the runtime type of the event:
 ```csharp
 class GrainState {
 
@@ -63,7 +63,7 @@ class GrainState {
 }
 ```
 
-**(二)**grains可以覆盖transitionState函数：
+**(b)** The grain can override the TransitionState function:
 ```csharp
 protected override void TransitionState(State state, EventType @event)
 {
@@ -71,16 +71,16 @@ protected override void TransitionState(State state, EventType @event)
 }
 ```
 
-假设转换方法除了修改状态对象之外没有任何副作用，并且应该是确定性的(否则，效果是不可预测的)。  如果转换代码抛出异常，则会捕获该异常并将其包含在日志一致性提供程序发出的Orleans日志中的警告中。
+The transition methods are assumed to have no side effects other than modifying the state object, and should be deterministic (otherwise, the effects are unpredictable).  If the transition code throws an exception, that exception is caught and included in a warning in the Orleans log, issued by the log-consistency provider.
 
-确切地说，运行时调用转换方法取决于所选的日志一致性提供程序及其配置。 对于应用程序来说，最好不要依赖于特定的时间，除非日志一致性提供程序特别保证。
+When, exactly, the runtime calls the transition methods depends on the chosen log consistency provider and its configuration. It is best for applications not to rely on a particular timing, except when specifically guaranteed by the log consistency provider.
 
-一些提供者，如`日志存储`日志一致性提供程序，每次加载Grain时重播事件序列。 因此，只要事件对象仍然可以从存储中正确反序列化，就有可能从根本上修改grainstate类和转换方法。 但对于其他提供商，如`状态存储`日志一致性提供程序，仅`Grain灰岩`对象是持久化的，因此开发人员必须确保从存储中读取时可以正确反序列化它。
+Some providers, such as the `LogStorage` log-consistency provider, replay the event sequence every time the grain is loaded. Therefore, as long as the event objects can still be properly deserialized from storage, it is possible to radically modify the GrainState class and the transition methods. But for other providers, such as the `StateStorage` log-consistency provider, only the `GrainState` object is persisted, so developers must ensure that it can be deserialized correctly when read from storage.
 
 
-## 引发多个事件
+## Raising Multiple Events
 
-在调用confirmeEvents之前，可以多次调用raiseEvent：
+It is possible to make multiple calls to RaiseEvent before calling ConfirmEvents:
 
 ```csharp
 RaiseEvent(e1);
@@ -88,33 +88,33 @@ RaiseEvent(e2);
 await ConfirmEvents();
 ```
 
-但是，这可能会导致两次连续的存储访问，并且只在写入第一个事件之后，Grains可能会失败。 因此，通常最好使用
+However, this is likely to cause two successive storage accesses, and it incurs a risk that the grain fails after writing only the first event. Thus, it is usually better to raise multiple events at once, using
 
 ```csharp
 RaiseEvents(IEnumerable<EventType> events)
 ```
 
-这保证了给定的事件序列以原子方式写入存储器。 请注意，由于版本号始终与事件序列的长度匹配，因此引发多个事件会使版本号每次增加一个以上。
+This guarantees that the given sequence of events is written to storage atomically. Note that since the version number always matches the length of the event sequence, raising multiple events increases the version number by more than one at a time.
 
 
-## 检索事件序列
+## Retrieving the Event Sequence
 
-下面的方法`日志记录`类允许应用程序检索所有已确认事件序列的指定段：
+The following method from the base `JournaledGrain` class allows the application to retrieve a specified segment of the sequence of all confirmed events:
 
 ```csharp
 Task<IReadOnlyList<EventType>> RetrieveConfirmedEvents(int fromVersion, int toVersion)
 ```
 
-但是，并非所有日志一致性提供程序都支持它。 如果不支持，或者序列的指定段不再可用，则`冒号`被扔了。
+However, it is not supported by all log consistency providers. If not supported, or if the specified segment of the sequence is no longer available, a `NotSupportedException` is thrown.
 
-要检索最新确认版本之前的所有事件，可以调用
+To retrieve all events up to the latest confirmed version, one would call
 ```csharp
 await RetrieveConfirmedEvents(0, Version);
 ```
 
-只能检索已确认的事件：如果`Toversion`大于属性的当前值`版本`是的。
+Only confirmed events can be retrieved: an exception is thrown if `toVersion` is larger than the current value of the property `Version`.
 
-因为确认的事件永远不会改变，所以即使在存在多个实例或延迟确认的情况下，也不必担心比赛。 但是，在这种情况下，有可能`版本`当await比当时恢复`检索确认事件`被调用，因此建议将其值保存在变量中。 另请参阅关于并发保证的部分。
+Since confirmed events never change, there are no races to worry about, even in the presence of multiple instances or delayed confirmation. However, in such situations, it is possible that the value of the property `Version` is larger by the time the `await` resumes than at the time `RetrieveConfirmedEvents` is called, so it may be advisable to save its value in a variable. See also the section on Concurrency Guarantees.
  
 
 
