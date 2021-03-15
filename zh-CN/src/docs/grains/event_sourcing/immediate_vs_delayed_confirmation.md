@@ -3,57 +3,57 @@ layout: page
 title: Immediate vs. Delayed Confirmation
 ---
 
-# 立即确认
+# Immediate Confirmation
 
-对于许多应用程序，我们希望确保事件立即得到确认，以便持久化的版本不会落后于内存中的当前版本，并且我们不会冒丢失最新状态的风险(如果grain失败)。 我们可以通过以下规则来保证：
+For many applications, we want to ensure that events are confirmed immediately, so that the persisted version does not lag behind the current version in memory, and we do not risk losing the latest state if the grain should fail. We can guarantee this by following these rules:
 
-1. 在Grain方法返回之前，使用`ConfirmEvents`确认所有`RaiseEvent`调用。
+1. Confirm all `RaiseEvent` calls using `ConfirmEvents` before the grain method returns.
 
-1. 在Grain方法返回之前确保由`RaiseConditionalEvent`返回的任务已完成。
+1. Make sure tasks returned by `RaiseConditionalEvent` complete before the grain method returns.
 
-1. 避免`[Reentrant]`或`[AlwaysInterleave]`属性，因此一次只能处理一个grain调用。
+1. Avoid  `[Reentrant]` or `[AlwaysInterleave]` attributes, so only one grain call can be processed at a time.
 
-如果我们遵循这些规则，则意味着在引发事件之后，在将事件写入存储器之前，不能执行其他Grain代码。 因此，不可能观察到内存中的版本和存储中的版本之间的不一致。 虽然这通常正是我们想要的，但它也有一些潜在的缺点。
-
-
-### 潜在劣势
-
-* 如果**与远程群集或存储的连接暂时中断**，则grain变得不可用：实际上，grain在等待确认事件时无法执行任何代码，这可能需要无限长的时间(日志一致性协议一直在重试，直到恢复存储连接)。
-
-* 处理时**对单个grain实例的大量更新**，一次确认一个会变得非常低效，即吞吐量很低。
+If we follow these rules, it means that after an event is raised, no other grain code can execute until the event has been written to storage. Therefore, it is impossible to observe inconsistencies between the version in memory and the version in storage. While this is often exactly what we want, it also has some potential disadvantages.
 
 
-# 延迟确认
+### Potential Disadvantages
 
-为了提高上述情况下的可用性和吞吐量，Grains可以选择执行以下一项或两项操作：
+* if the **connection to a remote cluster or to storage is temporarily interrupted**, then the grain becomes unavailable: effectively, the grain cannot execute any code while it is stuck waiting to confirm the events, which can take an indefinite amount of time (the log-consistency protocol keeps retrying until storage connectivity is restored).
 
-* 允许grain方法在不等待确认的情况下引发事件。
+* when handling **a lot of of updates to a single grain instance**, confirming them one at a time can become very inefficient, i.e. have poor throughput.
 
-* 允许重入，这样即使以前的调用在等待确认时被阻塞，grain也可以继续处理新的调用。
 
-这意味着当某些事件仍在确认过程中时，可以执行Grain代码。 这个`日志记录`api有一些具体规定，让开发人员能够精确控制如何处理当前“正在运行”的未经确认的事件。
+# Delayed Confirmation
 
-可以检查以下属性以了解当前未确认的事件：
+To improve availability and throughput in the situations mentioned above, grains can choose to do one or both of the following:
+
+* allow grain methods to raise events without waiting for confirmation.
+
+* allow reentrancy, so the grain can keep processing new calls even if previous calls get stuck waiting for confirmation.
+
+This means it is possible for grain code to execute while some events are still in the process of being confirmed. The `JournaledGrain` API has some specific provisions to give developers precise control over how to deal with unconfirmed events that are currently "in flight".
+
+The following property can be examined to find out what events are currently unconfirmed:
 
 ```csharp
 IEnumerable<EventType> UnconfirmedEvents { get; }
 ```
-而且，由于`State`属性不包括未确认事件的影响，有一个可选属性
+Also, since the state returned by the `State` property does not include the effect of unconfirmed events, there is an alternative property
 
 ```csharp
 StateType TentativeState { get; }
 ```
 
-它返回一个“暂定”状态，通过应用所有未确认的事件从“状态”获得。 在所有未经证实的事件被证实后，暂时状态本质上是对下一个确认状态的“最佳猜测”。 然而，并不能保证它真的会发生，因为Grains可能会失败，或者因为事件可能与其他事件竞争而失败，导致它们被取消(如果它们是有条件的)或者出现在序列中比预期的更晚的位置(如果它们是无条件的)。
+which returns a "tentative" state, obtained from "State" by applying all the unconfirmed events. The tentative state is essentially a "best guess" at what will likely become the next confirmed state, after all unconfirmed events are confirmed. However, there is no guarantee that it actually will, because the grain may fail, or because the events may race against other events and lose, causing them to be canceled (if they are conditional) or appear at a later position in the sequence than anticipated (if they are unconditional).
 
-# 并发保证
+# Concurrency Guarantees
 
-请注意，即使在使用Reentrant性或延迟确认的情况下，基于orleans turn的调度(协作并发)保证也始终适用。 这意味着，即使有几个方法在进行中，也只有一个方法可以主动执行——所有其他的方法都处于等待状态，因此从来没有任何真正的竞争是由并行线程引起的。
+Note that Orleans turn-based scheduling (cooperative concurrency) guarantees always apply, even when using reentrancy or delayed confirmation. This means that even though several methods may be in progress, only one can be actively executing --- all others are stuck at an await, so there are never any true races caused by parallel threads.
 
-尤其要注意：
+In particular, note that:
 
-- `State`, `TentativeState`, `Version`, 和 `UnconfirmedEvents` 属性可以在方法执行期间更改。
+- The properties `State`, `TentativeState`, `Version`, and `UnconfirmedEvents` can change during the execution of a  method.
 
-- 但这种变化只能在等待的时候发生。
+- But such changes can only happen while stuck at an await.
 
-这些保证假定用户代码保持在[推荐做法](../external_tasks_and_grains.md)关于任务和异步/等待(特别是，不使用线程池任务，或者只将它们用于不调用grain功能且等待正确的代码)。  
+These guarantees assume that the user code stays within the [recommended practice](~/docs/grains/external_tasks_and_grains.md) with respect to tasks and async/await (in particular, does not use thread pool tasks, or only uses them for code that does not call grain functionality and that are properly awaited).  
