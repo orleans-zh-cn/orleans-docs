@@ -5,24 +5,24 @@ title: Reentrancy
 
 # Reentrancy
 
-Grain activations are single-threaded and, by default, process each request from beginning to completion before the next request can begin processing. In some circumstances, it may be desirable for an activation to process other requests while one request is waiting for an asynchronous operation to complete. For this and other reasons, Orleans gives the developer some control over the request interleaving behavior. Multiple requests may be interleaved in the following cases:
+Grain激活是单线程的，默认情况下，在下一个请求可以开始处理之前，从头到尾处理每个请求。 在某些情况下，当一个请求等待异步操作完成时，可能需要激活来处理其他请求。 由于这个和其他原因，Orleans给了开发人员一些控制请求交错行为的权限。 在以下情况下，多个请求可能被交错：
 
-* The grain class is marked as `[Reentrant]`
-* The interface method is marked as `[AlwaysInterleave]`
-* The requests are made within the same call chain
-* The grain's *MayInterleave* predicate returns `true`
+* Grains等级标记为`[Reentrant]`
+* 接口方法标记为`[AlwaysInterleave]`
+* 同一调用链中的请求
+* Grains的*MayInterleave*谓词返回`true`
 
-Each of those cases are discussed in the following sections.
+以下各节将讨论这些情况。
 
-## Reentrant grains
+## 重入grains
 
-`Grain` implementation classes may be marked with the `[Reentrant]` attribute to indicate that different requests may be freely interleaved.
+`Grains`实现类可以用`[Reentrant]`属性指示不同的请求可以自由交错。
 
-In other words, a reentrant activation may start executing another request while a previous request has not finished processing. Execution is still limited to a single thread, so the activation is still executing one turn at a time, and each turn is executing on behalf of only one of the activation’s requests.
+换言之，Reentrant激活可能在前一个请求尚未完成处理时开始执行另一个请求。 执行仍然局限于单个线程，因此激活仍然一次执行一个回合，并且每个回合只代表激活的一个请求执行。
 
-Reentrant grain code will never run multiple pieces of grain code in parallel (execution of grain code will always be single-threaded), but reentrant grains **may** see the execution of code for different requests interleaving. That is, the continuation turns from different requests may interleave.
+ReentrantGrain代码永远不会并行运行多个Grain代码(Grain代码的执行将始终是单线程的)，但ReentrantGrain代码**可能**看见不同请求交错执行的代码。 也就是说，不同请求的续转可以交错。
 
-For example, with the pseudo-code below, when Foo and Bar are 2 methods of the same grain class:
+例如，使用下面的伪代码，当Foo和Bar是同一grain类的2个方法时：
 
 ``` csharp
 Task Foo()
@@ -38,25 +38,25 @@ Task Bar()
 }
 ```
 
-If this grain is marked `[Reentrant]`, the execution of Foo and Bar may interleave.
+如果这个grains有标记`[Reentrant]`，Foo和Bar的执行可以交错执行。
 
-For example, the following order of execution is possible:
+例如，可以按以下顺序执行：
 
-Line 1, line 3, line 2 and line 4. That is, the turns from different requests interleave.
+1号线、3号线、2号线和4号线。 也就是说，来自不同请求的圈数交错。
 
-If the grain was not reentrant, the only possible executions would be: line 1, line 2, line 3, line 4 OR: line 3, line 4, line 1, line 2 (new request cannot start before the previous one finished).
+如果grain不Reentrant，唯一可能的执行将是：第1行、第2行、第3行、第4行或：第3行、第4行、第1行、第2行(在前一个请求完成之前，新请求无法启动)。
 
-The main tradeoff in choosing between reentrant and non-reentrant grains is the code complexity to make interleaving work correctly, and the difficulty to reason about it.
+在选择Reentrant和不Reentrantgrains时，主要的折衷是使交织正确工作的代码复杂度和对此进行推理的困难。
 
-In a trivial case when the grains are stateless and the logic is simple, fewer (but not too few, so that all the hardware threads are used) reentrant grains should in general be slightly more efficient.
+在一个很小的例子中，当Grain是无状态的，逻辑也很简单时，更少(但不是太少，以便使用所有的硬件线程)Reentrantgrains通常会稍微更有效一些。
 
-If the code is more complex, then a larger number of non-reentrant grains, even if slightly less efficient overall, should save you a lot of grief of figuring out non-obvious interleaving issues.
+如果代码更复杂，那么大量的不Reentrantgrains，即使总体效率稍低，也可以避免您在解决不明显的交错问题时的许多痛苦。
 
-In the end, the answer will depend on the specifics of the application.
+最终答案将取决于具体的应用程序。
 
-## Interleaving methods
+## 交错方法
 
-Grain interface methods marked with `[AlwaysInterleave]` will be interleaved regardless of whether the grain is reentrant or not. Consider the following example:
+grains接口被标记为`[AlwaysInterleave]`无论grains是否Reentrant，都将被交错执行。 考虑以下示例：
 
 ``` csharp
 public interface ISlowpokeGrain : IGrainWithIntegerKey
@@ -81,7 +81,7 @@ public class SlowpokeGrain : Grain, ISlowpokeGrain
 }
 ```
 
-Now consider the call flow initiated by the following client request:
+现在考虑由以下客户端请求启动的调用流：
 
 ``` csharp
 var slowpoke = client.GetGrain<ISlowpokeGrain>(0);
@@ -91,13 +91,14 @@ await Task.WhenAll(slowpoke.GoSlow(), slowpoke.GoSlow());
 
 // B) This will take around 10 seconds.
 await Task.WhenAll(slowpoke.GoFast(), slowpoke.GoFast(), slowpoke.GoFast());
+await Task.WhenAll(slowpoke.GoFast(), slowpoke.GoFast(), slowpoke.GoFast());
 ```
 
-Calls to `GoSlow` will not be interleaved, so the execution of the two `GoSlow()` calls will take around 20 seconds. On the other hand, because `GoFast` is marked `[AlwaysInterleave]`, the three calls to it will be executed concurrently and will complete in approximately 10 seconds total instead of requiring at least 30 seconds to complete.
+访问`GoSlow`不会交错，所以执行两个`GoSlow()`调用大约需要20秒。 另一方面，因为`GoFast`有标记`[AlwaysInterleave]`，对它的三个调用将同时执行，并将在大约10秒内完成，而不是至少需要30秒才能完成。
 
-## Reentrancy within a call chain
+## 访问链中的Reentrant性
 
-In order to avoid deadlocks, the scheduler allows reentrancy within a given call chain. Consider the following example of two grains which have mutually recursive methods, `IsEven` and `IsOdd`:
+为了避免死锁，调度器允许在给定的调用链中进行重入。 考虑以下两个grains的例子，它们具有相互递归的方法，`IsEven`和`IsOdd`:
 
 ``` csharp
 public interface IEvenGrain : IGrainWithIntegerKey
@@ -131,29 +132,33 @@ public class OddGrain : Grain, IOddGrain
 }
 ```
 
-Now consider the call flow initiated by the following client request:
+现在考虑由以下客户端请求启动的调用：
 
 ``` csharp
 var evenGrain = client.GetGrain<IEvenGrain>(0);
 await evenGrain.IsEven(2);
 ```
 
-The above code calls `IEvenGrain.IsEven(2)`, which calls `IOddGrain.IsOdd(1)`, which calls `IEvenGrain.IsEven(0)`, which returns `true` back up the call chain to the client. Without call chain reentrancy, the above code will result in a deadlock when `IOddGrain` calls `IEvenGrain.IsEven(0)`. However, with call chain reentrancy, the call is allowed to proceed, as it is deemed to be the intention of the developer.
+上面的代码调用`IEvenGrain.IsEven(2)`，调用`IOddGrain.IsOdd(1)`，调用`IEvenGrain.IsEven(0)`，返回`true`将访问链备份到客户端。 如果没有调用链Reentrant，上述代码将在以下情况下导致死锁当`IOddGrain`调用`IEvenGrain.IsEven(0)`. 然而，对于调用链Reentrant，调用被认为是开发人员的意图，因此允许继续进行。 However, with call chain reentrancy, the call is allowed to proceed, as it is deemed to be the intention of the developer.
 
-This behavior can be disabled by setting `SchedulingOptions.AllowCallChainReentrancy` to `false`. For example:
+可以通过设置来禁用此行为`SchedulingOptions.AllowCallChainEntrancy`为`false`. 例如： For example:
 
 ``` csharp
 siloHostBuilder.Configure<SchedulingOptions>(
     options => options.AllowCallChainReentrancy = false);
 ```
 
-## Reentrancy using a predicate
+## 使用谓词的Reentrant性
 
-Grain classes can specify a predicate to determine interleaving on a call-by-call basis by inspecting the request. The `[MayInterleave(string methodName)]` attribute provides this functionality. The argument to the attribute is the name of a static method within the grain class which accepts an `InvokeMethodRequest` object and returns a `bool` indicating whether or not the request should be interleaved.
+Grain类可以指定一个谓词，用于通过检查请求逐个调用确定交错。 这个`[MayInterleave(string methodName)]`属性提供此功能。 属性的参数是grain类中接受`InvokeMethodRequest`对象并返回`bool`指示是否应交错请求。
 
-Here is an example which allows interleaving if the request argument type has the `[Interleave]` attribute:
+下面是一个示例，如果请求参数类型具有 `[Interleave]`属性：
 
 ``` csharp
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+public sealed class InterleaveAttribute : Attribute { }
+
+// Specify the may-interleave predicate.
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 public sealed class InterleaveAttribute : Attribute { }
 
@@ -164,6 +169,16 @@ public class MyGrain : Grain, IMyGrain
     public static bool ArgHasInterleaveAttribute(InvokeMethodRequest req)
     {
         // Returning true indicates that this call should be interleaved with other calls.
+        // Returning false indicates the opposite.
+        return req.Arguments.Length == 1
+            && req.Arguments[0]?.GetType().GetCustomAttribute<InterleaveAttribute>() != null;
+    }
+
+    public Task Process(object payload)
+    {
+        // Process the object.
+    }
+}
         // Returning false indicates the opposite.
         return req.Arguments.Length == 1
             && req.Arguments[0]?.GetType().GetCustomAttribute<InterleaveAttribute>() != null;
