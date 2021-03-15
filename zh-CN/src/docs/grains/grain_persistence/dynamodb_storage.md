@@ -5,13 +5,13 @@ title: Amazon DynamoDB Grain Persistence
 
 # Amazon DynamoDB Grain Persistence
 
-## Installation
+## 安装
 
-Install the [`Microsoft.Orleans.Persistence.DynamoDB`](https://www.nuget.org/packages/Microsoft.Orleans.Persistence.DynamoDB) package from NuGet.
+安装[Microsoft.Orleans.Persistence.DynamoDB](https://www.nuget.org/packages/Microsoft.Orleans.Persistence.DynamoDB)NuGet的软件包。
 
-## Configuration
+## 组态
 
-Configure the Dynamo DB grain persistence provider using the `ISiloBuilder.AddDynamoDBGrainStorage` extension methods.
+使用以下命令配置Dynamo DB Grain Persistence提供程序`ISiloBuilder.AddDynamoDBGrainStorage`扩展方法。
 
 ``` csharp
 siloBuilder.AddDynamoDBGrainStorage(
