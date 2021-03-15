@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Orleans Blog
+title: Developing a Grain
 ---
 
 ## [Solving a Transactions Performance Mystery](solving-a-transactions-performance-mystery.md)
@@ -8,13 +8,13 @@ title: Orleans Blog
 
 * * * * *
 
-After arriving in Redmond and completing the mandatory New Employee Orientation, my first task on the Orleans team has been to assist with some ongoing performance investigations in order to ensure that Orleans' Transactions support is ready for internal users and hence release.
+有关更详尽的说明，请参见[项目设置](../tutorials_and_samples/tutorial_1.md#project-setup)的部分[教程一–Orleans基础](../tutorials_and_samples/tutorial_1.md)。
 
 We were seeing significant performance issues and a large number of transaction failures in the stress/load tests against our test cluster. A large fraction of transactions were stalling until timeout.
 
 
 ## [Dmitry Vakulenko](dmitry-vakulenko.md)
-[Sergey Bykov](https://github.com/sergeybykov) 11/19/2018 1:57:59 PM
+以下是Orleans 1.5 Presence Service示例的摘录：
 
 * * * * *
 
@@ -25,7 +25,7 @@ Dmitry also contributed other improvements, but his passion continued to be perf
 
 ## [Announcing Orleans 2.1](announcing-orleans-2.1.md)
 
-[Reuben Bond](https://github.com/ReubenBond) 10/1/2018 7:17:59 PM
+标记为async直接返回值：
 
 * * * * *
 
