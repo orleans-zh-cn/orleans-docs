@@ -5,19 +5,19 @@ title: Observers
 
 # Observers
 
-There are situations in which a simple message/response pattern is not enough, and the client needs to receive asynchronous notifications. For example, a user might want to be notified when a new instant message has been published by a friend.
+在某些情况下，简单的消息/响应模式是不够的，客户端需要接收异步通知。 例如，当朋友发布了新的即时消息时，用户可能希望收到通知。
 
-Client observers is a mechanism that allows notifying clients asynchronously. An observer is a one-way asynchronous interface that inherits from `IGrainObserver`, and all its methods must be void. The grain sends a notification to the observer by invoking it like a grain interface method, except that it has no return value, and so the grain need not depend on the result. The Orleans runtime will ensure one-way delivery of the notifications. A grain that publishes such notifications should provide an API to add or remove observers. In addition, it is usually convenient to expose a method that allows an existing subscription to be cancelled. Grain developers may use the Orleans `ObserverSubscriptionManager<T>` generic class to simplify development of observed grain types.
+客户端观察器是一种允许异步通知客户端的机制。 观察者是一个单向异步接口，它继承自`IGrainObserver`，其所有方法都必须是无效的。 grain通过像grain接口方法一样调用它来向观察者发送通知，只是它没有返回值，因此grain不需要依赖于结果。 Orleans运行时将确保单向传递通知。 发布此类通知的Grain应该提供一个api来添加或删除观察者。 此外，通常公开一种允许取消现有订阅的方法通常是方便的。 Grains开发商可能会使用Orleans`ObserverSubscriptionManager<T>`类，以简化观察到的grains类型的开发。
 
-To subscribe to a notification, the client must first create a local C# object that implements the observer interface. It then calls a static method on the observer factory, `CreateObjectReference()`, to turn the C# object into a grain reference, which can then be passed to the subscription method on the notifying grain.
+要订阅通知，客户端必须首先创建一个实现观察者接口的本地c对象。 然后调用观察者工厂上的静态方法，`CreateObjectReference()`，将c对象转换为一个grain引用，然后可以将其传递给通知grain上的订阅方法。
 
-This model can also be used by other grains to receive asynchronous notifications. Unlike in the client subscription case, the subscribing grain simply implements the observer interface as a facet, and passes in a reference to itself (e.g. `this.AsReference<IMyGrainObserverInterface>`).
+这个模型也可以被其他Grains用来接收异步通知。 与客户端订阅情况不同，订阅Grain只是将observer接口实现为一个方面，并将引用传递给自己(例如。 `this.AsReference<IMyGrainObserverInterface>`)中。
 
-## Code Example
+## 代码示例
 
-Let's assume that we have a grain that periodicaly sends messages to clients. For simplicity, the message in our example will be a  string. We first define the interface on the client that will receive the message.
+假设我们有一个周期性地向客户发送消息的Grain。 为了简单起见，我们的示例中的消息将是一个字符串。 我们首先在客户端上定义将接收消息的接口。
 
-The interface will look like this
+接口将如下所示
 
 ``` csharp
 public interface IChat : IGrainObserver
@@ -27,9 +27,9 @@ public interface IChat : IGrainObserver
 
 ```
 
-The only special thing is that the interface should inherit from `IGrainObserver`. Now any client that wants to observe those messages should implement a class which implements `IChat`.
+唯一特别的是接口应该继承自`IGrainObserver`是的。 现在，任何希望观察这些消息的客户端都应该实现一个实现`IChat`是的。
 
-The simplest case would be something like this:
+最简单的例子是这样的：
 
 ``` csharp
 public class Chat : IChat
@@ -41,7 +41,7 @@ public class Chat : IChat
 }
 ```
 
-On the server, we should next have a Grain which sends these chat messages to clients. The Grain should also have a mechanism for clients to subscribe and unsubscribe themselves for notifications. For subscriptions, the Grain can use the utility class `ObserverSubscriptionManager`. This class throws an `OrleansException` if you try to subscribe to an observer that is already subscribed to (or unsubscribe from an observer that is not subscribed to), so it is important to handle this case by using the `IsSubscribed()` method or by handling the `OrleansException`:
+现在在服务器上，我们应该有一个Grains发送这些聊天信息给客户端。 grain还应该有一个机制，让客户端订阅和取消订阅自己以接收通知。 对于订阅，grain可以使用utility类`ObserverSubscriptionManager`是的。 这个班的学生`OrleansException`如果您尝试订阅已订阅的观察者(或取消订阅未订阅的观察者)，那么使用`IsSubscribed()`方法或通过处理`OrleansException`以下内容：
 
 ``` csharp
 class HelloGrain : Grain, IHello
@@ -51,6 +51,30 @@ class HelloGrain : Grain, IHello
     public override async Task OnActivateAsync()
     {
         // We created the utility at activation time.
+        _subsManager = new ObserverSubscriptionManager<IChat>();
+        await base.OnActivateAsync();
+    }
+
+    // Clients call this to subscribe.
+    public Task Subscribe(IChat observer)
+    {
+        if (!_subsManager.IsSubscribed(observer))
+        {
+            _subsManager.Subscribe(observer);
+        }
+        return Task.CompletedTask;
+    }
+
+    //Also clients use this to unsubscribe themselves to no longer receive the messages.
+    public Task UnSubscribe(IChat observer)
+    {
+        if (_subsManager.IsSubscribed(observer))
+        {
+            _subsManager.Unsubscribe(observer);
+        }
+        return Task.CompletedTask;
+    }
+}
         _subsManager = new ObserverSubscriptionManager<IChat>();
         await base.OnActivateAsync();
     }
@@ -77,7 +101,7 @@ class HelloGrain : Grain, IHello
 }
 ```
 
-To send a message to clients, the `Notify` method of the `ObserverSubscriptionManager<IChat>` instance can be used. The method takes an `Action<T>` method or lambda expression (where `T` is of type `IChat` here). You can call any method on the interface to send it to clients. In our case we only have one method, `ReceiveMessage`, and our sending code on the server would look like this:
+将消息发送到客户端`Notify`方法`ObserverSubscriptionManager<Ichat>`可以使用实例。 这种方法需要`Action<T>`方法或lambda表达式(其中`T`属于类型`IChat`)。 可以调用接口上的任何方法将其发送给客户端。 我们只有一种方法`ReceiveMessage`我们在服务器上发送的代码如下所示：
 
 ``` csharp
 public Task SendUpdateMessage(string message)
@@ -88,23 +112,26 @@ public Task SendUpdateMessage(string message)
 
 ```
 
-Now our server has a method to send messages to observer clients, two methods for subscribing/unsubscribing, and the client has implemented a class able to observe the grain messages. The last step is to create an observer reference on the client using our previously implemented `Chat` class, and let it receive the messages after subscribing to it.
+现在，我们的服务器有一个向观察者客户端发送消息的方法，两个用于订阅/取消订阅的方法，并且客户端实现了一个能够观察到grain消息的类。 最后一步是使用之前实现的`Chat`类并让它在订阅后接收消息。
 
-The code would look like this:
+代码如下所示：
 
 ``` csharp
 //First create the grain reference
 var friend = GrainClient.GrainFactory.GetGrain<IHello>(0);
 Chat c = new Chat();
 
-//Create a reference for chat, usable for subscribing to the observable grain.
+//Create a reference for chat usable for subscribing to the observable grain.
+var obj = await GrainClient.GrainFactory.CreateObjectReference<IChat>(c);
+//Subscribe the instance to receive messages.
+await friend.Subscribe(obj);
 var obj = await GrainClient.GrainFactory.CreateObjectReference<IChat>(c);
 //Subscribe the instance to receive messages.
 await friend.Subscribe(obj);
 ```
 
-Now whenever our grain on the server calls the `SendUpdateMessage` method, all subscribed clients will receive the message. In our client code, the `Chat` instance in variable `c` will receive the message and output it to the console.
+现在每当服务器上的Grains调用`SendUpdateMessage`方法，所有已订阅的客户端都将收到消息。 在我们的客户代码中，`Chat`变量中的实例`C`将接收消息并将其输出到控制台。
 
-**Note:** Objects passed to `CreateObjectReference` are held via a [`WeakReference<T>`](https://msdn.microsoft.com/en-us/library/system.weakreference) and will therefore be garbage collected if no other references exist. Users should maintain a reference for each observer which they do not want to be collected.
+**注：**传递给的对象`CreateObjectReference`通过[`WeakReference<T>`](https://msdn.microsoft.com/en-us/library/system.weakreference)因此，如果没有其他引用，则将被垃圾收集。 用户应该为每个不希望被收集的观察者维护一个引用。
 
-**Note:** Observers are inherently unreliable, since you don't get any response back to know if the message is received and processed or simply failed due to any condition which might arise in a distributed system. Because of that, your observers should poll the grain periodically or use any other mechanism to ensure that they received all messages which they should have received. In some situations you can afford to lose some messages and you don't need any additional mechanism, but if you need to make sure that all observers are always receiving the messages and are receiving all of them, both periodic resubscriptions and polling the observer grain can help to ensure eventual processing of all messages.
+**注：**观察者本质上是不可靠的，因为您没有得到任何响应来知道消息是被接收和处理的，还是仅仅由于分布式系统中可能出现的任何情况而失败。 因此，您的观察者应该定期轮询grain或使用任何其他机制来确保他们接收到了所有应该接收到的消息。 在某些情况下，您可能会丢失一些消息，并且不需要任何附加机制，但如果您需要确保所有观察者始终接收消息并接收所有消息，则定期重新订阅和轮询观察者Grain有助于确保最终处理所有消息。
