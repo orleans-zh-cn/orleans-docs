@@ -3,24 +3,24 @@ layout: page
 title: Samples Overview
 ---
 
-# Tutorials
+# 讲解
 
-## [Tutorial 1: Orleans Basics](tutorial_1.md)
+## [教程1：Orleans基础知识](tutorial_1.md)
 
-Tutorial one guides you through the steps to create the structure and set up the packages and references of your first Orleans app.
+教程1指导您完成创建结构并设置第一个Orleans应用程序的包和🚰的步骤。
 
-# Samples
+# 样品
 
-## What you need
+## 你需要什么
 
-The samples are self-contained, except where noted. You might need an Azure subscription for some of the samples. For the Azure-based samples, you will need to install the SDK.
+除非另有说明，否则样品均为自包含的示例。 对于某些示例，您可能需要Azure订阅。 对于基于Azure的示例，您将需要安装SDK。
 
-The samples can be downloaded from [GitHub](https://github.com/dotnet/orleans/tree/master/Samples).
+可以从以下位置下载示例[的GitHub](https://github.com/dotnet/orleans/tree/master/Samples)。
 
-## [Hello World](overview_helloworld.md)
+## [Hello，World](overview_helloworld.md)
 
-An Orleans version of the classic Hello World app. This demonstrates that while there is no such thing as "trivial" when you are dealing with distributed computing, Orleans makes it pretty straight-forward.=
+经典的Hello World应用程序的Orleans版本。 这个示例在处理分布式计算时，没有“琐碎”的东西，Orleans使它变得直接明了。
 
-## [Adventure](Adventure.md)
+## [MathGrains](Adventure.md)
 
-Before there were graphical user interfaces, before the era of game consoles and massive-multiplayer games, there were VT100 terminals and there was [Colossal Cave Adventure](http://en.wikipedia.org/wiki/Colossal_Cave_Adventure). Possibly lame by today's standards, back then it was a magical world of monsters, chirping birds, and things you could pick up. It's the inspiration for this sample.
+在没有图形用户接口之前，在游戏机和大型多人游戏时代之前，有VT100终端，并且有[巨大的洞穴冒险](http://en.wikipedia.org/wiki/Colossal_Cave_Adventure)。 按照今天的标准，这可能是la脚的，那时候是一个神奇的世界，里面有怪物、,叫的鸟以及可以捡到的东西。 这是此示例的灵感。
