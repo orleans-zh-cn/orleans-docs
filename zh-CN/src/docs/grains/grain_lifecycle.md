@@ -5,13 +5,13 @@ title: Grain Lifecycle
 
 # Grain Lifecycle
 
-## Overview
+## 总览
 
-Orleans grains use an observable lifecycle (See [Orleans Lifecycle](~/docs/implementation/orleans_lifecycle.md)) for ordered activation and deactivation. This allows grain logic, system components and application logic to be started and stopped in an ordered manner during grain activation and collection.
+OrleansGrains使用可观察到的生命周期(请参见[Orleans生命周期](../implementation/orleans_lifecycle.md))进行有序的激活和停用。 这允许在Grains激活和收集期间以有序的方式启动和停止Grains逻辑，系统组件和应用程序逻辑。
 
-### Stages
+### 阶段
 
-The pre-defined grain lifecycle stages are as follows.
+预定的Grains生命周期阶段如下。
 
 ```csharp
 public static class GrainLifecycleStage
@@ -23,19 +23,19 @@ public static class GrainLifecycleStage
 }
 ```
 
-- `First` - First stage in grain’s lifecycle
-- `SetupState` – Setup grain state, prior to activation. For stateful grains, this is the stage where state is loaded from storage.
-- `Activate` – Stage where `OnActivateAsync` and `OnDeactivateAsync` are called
-- `Last` - Last stage in grain's lifecycle
+- `First`-Grains生命周期的第一阶段
+- `SetupState`–在激活之前设置grains状态。 对于有状态的Grains，这是从存储中加载状态的阶段。
+- `Activate`–`OnActivateAsync`和`OnDeactivateAsync`阶段
+- `Last`-Grains生命周期的最后阶段
 
-While the grain lifecycle will be used during grain activation, since grains are not always deactivated during some error cases (such as silo crashes), applications should not rely on the grain lifecycle always being executed during grain deactivations.
+尽管将在Grains激活期间使用Grains生命周期，但由于在某些错误情况下(例如Silo崩溃)并非总是停用Grains，因此应用程序不应依赖于在Grains停用过程中始终执行的Grains生命周期。
 
-### Grain Lifecycle Participation
-Application logic can participate with a grain’s lifecycle in two ways: The grain can participate in its lifecycle, and/or components can access the lifecycle via the grain activation context (see IGrainActivationContext.ObservableLifecycle).
+### grain生命周期参与
+应用程序逻辑可以通过两种方式参与Grains的生命周期：Grains可以参与其生命周期，和/或组件可以通过Grains激活上下文访问生命周期(请参阅IGrainActivationContext.ObservableLifecycle)。
 
-A grain always participates in its own lifecycle, so application logic can be introduced by overriding the participate method.
+Grains始终参与其自身的生命周期，因此可以通过覆盖参与方法来引入应用程序逻辑。
 
-### Example
+### 示例
 
 ```csharp
 public override void Participate(IGrainLifecycle lifecycle)
@@ -45,13 +45,13 @@ public override void Participate(IGrainLifecycle lifecycle)
 }
 ```
 
-In the above example, `Grain<T>` overrides the `Participate` method to tell the lifecycle to call its OnSetupState method during the SetupState stage of the lifecycle.
+在上面的示例中，`grains<T>`覆盖`参加`告诉生命周期的方法在生命周期的SetupState阶段调用其OnSetupState方法。
 
-Components created during a grain’s construction can take part in the lifecycle as well, without any special grain logic being added. Since the grain’s activation context (`IGrainActivationContext`), including the grain’s lifecycle (`IGrainActivationContext.ObservableLifecycle`), is created before the grain is created, any component injected into the grain by the container can participate in the grain’s lifecycle.
+在Grains的构造过程中创建的组件也可以参与生命周期，而无需添加任何特殊的Grains逻辑。 由于Grains的激活环境(`IGrainActivationContext`)，包括Grains的生命周期(`IGrainActivationContext.ObservableLifecycle`)是在创建Grains之前创建的，容器注入Grains中的任何成分都可以参与Grains的生命周期。
 
-### Example
+### 示例
 
-The below component participates in the grain’s lifecycle when created using its factory function `Create(..)`. This logic could exist in the component’s constructor, but that risks the component being added to the lifecycle before it’s fully constructed, which may not be safe.
+使用工厂方法`Create(..)`创建时，以下组件会参与Grains的生命周期。 这种逻辑可能存在于组件的构造函数中，但是这会冒着风险在组件完全构建之前将其添加到生命周期中的风险，这可能并不安全。
 
 ```csharp
 public class MyComponent : ILifecycleParticipant<IGrainLifecycle>
@@ -75,16 +75,16 @@ public class MyComponent : ILifecycleParticipant<IGrainLifecycle>
 }
 ```
 
-By registering the above component in the service container using its `Create(..)` factory function, any grain constructed with the component as a dependency will have the component taking part in its lifecycle without any special logic in the grain.
+通过工厂方法`Create(..)`注册上述组件到服务容器中，任何将组件作为依赖项构造的grain将使组件参与其生命周期，而grain中没有任何特殊逻辑。
 
-#### Register component in container
+#### 在容器中注册组件
 
 ```csharp
     services.AddTransient<MyComponent>(sp =>
         MyComponent.Create(sp.GetRequiredService<IGrainActivationContext>());
 ```
 
-#### Grain with component as dependency
+#### Grains以成分为依存关系
 
 ```csharp
 public class MyGrain : Grain, IMyGrain
