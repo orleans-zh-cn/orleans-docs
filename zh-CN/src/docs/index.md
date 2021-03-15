@@ -15,7 +15,7 @@ Orleans采用了对象，接口，async/await和try/catch等熟悉的概念，�
 
 ![A grain is composed of a stable identity, behavior, and state](~/images/grain_formulation.svg)
 
-任何Orleans应用程序的基本构建块都是*grain*. grains是由用户定义的身份、行为和状态组成的实体。 Grains are entities comprising user-defined identity, behavior, and state. grains标识是用户定义的键，使grains始终可供调用。 Grains可以通过强类型通信接口(contract)被其他Grains或Web前端等外部客户端调用。 每个grains都是实现一个或多个这些接口的类的一个实例。
+任何Orleans应用程序的基本构建块都是*grain*. Grains are entities comprising user-defined identity, behavior, and state. grains标识是用户定义的键，使grains始终可供调用。 Grains可以通过强类型通信接口(contract)被其他Grains或Web前端等外部客户端调用。 每个grains都是实现一个或多个这些接口的类的一个实例。
 
 Grains可以具有挥发性和/或持久化状态，可以存储在任何存储系统中。 因此，grains隐式地划分应用程序状态，从而实现自动可伸缩性并简化故障恢复。 当Grain处于活动状态时，Grain状态被保存在内存中，从而降低了延迟和数据存储的负载。
 
@@ -104,7 +104,7 @@ Orleans提供了一个简单的持久化模型，确保在处理请求之前，�
 
 ### 分布式ACID事务
 
-In addition to the simple persistence model described above, grains can have *transactional state*. Multiple grains can participate in [ACID](https://en.wikipedia.org/wiki/ACID) transactions together regardless of where their state is ultimately stored. Orleans的事务是分布式和分散的(没有中央事务管理器或事务协调器)，并且[可串行隔离](https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels). 有关Orleans交易的更多信息，请参阅[文档](grains/transactions.md)以及[微软研究院技术报告](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/). For more information on transactions in Orleans, see the [documentation](grains/transactions.md) and the [Microsoft Research technical report](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/).
+除了上述简单的持久性模型外，Grains还可以有 *个事务性状态*。 多个谷物可以一起参与 [ACID](https://en.wikipedia.org/wiki/ACID) 事务，不管其最终的状态存储在哪里。 Orleans的事务是分布式和分散的(没有中央事务管理器或事务协调器)，并且[可串行隔离](https://en.wikipedia.org/wiki/Isolation_(database_systems)#Isolation_levels). 有关Orleans交易的更多信息，请参阅[文档](grains/transactions.md)以及[微软研究院技术报告](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/). 关于Orleans事务的更多信息，请参阅 [文档](grains/transactions.md) and [Microsoft Research technical report](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/)。
 
 ### Streams
 
