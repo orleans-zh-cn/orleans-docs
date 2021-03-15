@@ -5,19 +5,19 @@ title: Azure Storage Grain Persistence
 
 # Azure Storage Grain Persistence
 
-The Azure Storage grain persistence provider supports both [Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/) and [Azure Table Storage](https://azure.microsoft.com/en-us/services/storage/tables/).
+Azure存储Grain持久化提供程序同时支持[Azure Blob存储](https://azure.microsoft.com/en-us/services/storage/blobs/)和[Azure表存储](https://azure.microsoft.com/en-us/services/storage/tables/)。
 
-## Installation
+## 安装
 
-Install the [`Microsoft.Orleans.Persistence.AzureStorage`](https://www.nuget.org/packages/Microsoft.Orleans.Persistence.AzureStorage) package from NuGet.
+安装[`Microsoft.Orleans.Persistence.AzureStorage`](https://www.nuget.org/packages/Microsoft.Orleans.Persistence.AzureStorage)NuGet的软件包。
 
-## Configuration
+## 组态
 
-### Azure Table Storage
+### Azure表存储
 
-The Azure Table Storage provider stores state in a table row, splitting the state over multiple columns if the limits of a single column are exceeded. Each row can hold a maximum length of one megabyte, as [imposed by Azure Table Storage](https://docs.microsoft.com/en-us/azure/storage/common/storage-scalability-targets#azure-table-storage-scale-targets).
+Azure表存储提供程序将状态存储在表行中，如果超出单个列的限制，则将状态分为多个列。 每行的最大长度为一兆字节，例如[扩展Azure表存储](https://docs.microsoft.com/en-us/azure/storage/common/storage-scalability-targets#azure-table-storage-scale-targets)。
 
-Configure the Azure Table Storage grain persistence provider using the `ISiloBuilder.AddAzureTableGrainStorage` extension methods.
+使用以下命令配置Azure表存储Grain持久化提供程序`ISiloBuilder.AddAzureTableGrainStorage`扩展方法。
 
 ``` csharp
 siloBuilder.AddAzureTableGrainStorage(
@@ -29,11 +29,11 @@ siloBuilder.AddAzureTableGrainStorage(
     });
 ```
 
-### Azure Blob Storage
+### Azure Blob存储
 
-The Azure Blob Storage provider stores state in a blob.
+Azure Blob存储提供程序将状态存储在Blob中。
 
-Configure the Azure Blob Storage grain persistence provider using the `ISiloBuilder.AddAzureBlobGrainStorage` extension methods.
+使用以下命令配置Azure Blob存储Grain持久化提供程序`ISiloBuilder.AddAzureBlobGrainStorage`扩展方法。
 
 ``` csharp
 siloBuilder.AddAzureBlobGrainStorage(
