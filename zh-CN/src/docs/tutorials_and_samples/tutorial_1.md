@@ -3,72 +3,72 @@ layout: page
 title: Tutorial One
 ---
 
-# Tutorial One - Creating a Minimal Orleans Application
+# 教程一-创建极简的Orleans应用程序
 
-This tutorial provides step by step instructions for creating a basic functioning Orleans application. It is designed to be self-contained and minimalistic, with the following traits:
+本教程提供有关创建基本运行的Orleans应用程序的逐步说明。 它被设计为自包含且极简的，具有以下特征：
 
-- It relies only on NuGet packages
-- It has been tested in Visual Studio 2017 using Orleans 2.2.0
-- It has no reliance on external storage
+- 它仅依赖NuGet软件包
+- 已使用Orleans 2.2.0在Visual Studio 2017中进行了测试
+- 它不依赖外部存储
 
-Keep in mind that this is only a tutorial and lacks appropriate error handling and other goodies that would be useful for a production environment. However, it should help the readers get a real hands-on with regards to the structure of Orleans and allow them to focus their continued learning on the parts most relevant to them.
+请记住，这只是一个教程，缺少适当的错误处理和其他对生产环境有用的东西。 但是，它可以帮助读者真正了解Orleans的结构，并使他们将继续学习的重点放在与他们最相关的部分上。
 
-## Project Setup
+## 项目搭建
 
-For this tutorial we’re going to create 4 projects:
+在本教程中，我们将创建4个项目：
 
-- a library to contain the grain interfaces
-- a library to contain the grain classes
-- a console application to host our Silo
-- a console application to host our Client
+- 一个包含Grains接口的库
+- 一个包含Grains类的库
+- 一个控制台应用程序来托管我们的silos
+- 一个控制台应用程序来托管我们的客户端
 
-After following this tutorial, the complete Solution should look like this:
+遵循本教程之后，完整的解决方案应如下所示：
 
 ![](~/images/orleansbasics_complete_app.png)
 
-### Create the structure in Visual Studio
+### 在Visual Studio中创建这样的项目结构
 
-Note: You can use the default project types in c# for each of these projects. You will replace the default code with the code given for each project, below. You will also probably need to add `using` statements.
+注意：在这些项目的每个项目，您可以使用C#的默认项目类型。 然后您在下面为每个项目提供的代码替换默认代码。 您可能还需要添加`using`语句。
 
-1. Start by creating a Console App (.NET Core) project in a new solution. Call the project part `Silo` and name the solution `OrleansHelloWorld`.
-2. Add another Console App (.NET Core) project and name it `Client`.
-3. Add a Class Library (.NET Standard) and name it `GrainInterfaces`.
-4. Add another Class Library (.NET Standard) and name it `Grains`.
+1. 首先在新解决方案中创建一个控制台应用程序(.NET Core)项目。 项目命名为`Silo`并命名解决方案为`Orleans Basics`。
+2. 添加另一个控制台应用程序(.NET Core)项目并将其命名`Client`。
+3. 添加一个类库(.NET Standard)并命名`GrainInterfaces`。
+4. 添加另一个类库(.NET Standard)并命名`Grains`。
 
-#### Delete default source files
+#### 删除默认源文件
 
-1. Delete Class1.cs from Grains
-2. Delete Class1.cs from GrainInterfaces
+1. 删除Grains中的Class1.cs
+2. 删除GrainInterfaces的Class1.cs
 
-### Add References
+### 添加项目引用
 
-1. `Grains` references `GrainInterfaces`.
-2. `Silo` references `GrainInterfaces` and `Grains`.
-3. `Client` references `GrainInterfaces`.
+1. `Grains`引用`GrainInterfaces`。
+2. `Silo`引用`GrainInterfaces`和`Grains`。
+3. `Clinet`引用`GrainInterfaces`。
 
-## Add Orleans NuGet Packages
+## 添加Orleans相关的NuGet包
 
-| Project          | Nuget Package                               |
-| ---------------- | ------------------------------------------- |
-| Silo             | `Microsoft.Orleans.Server`                  |
-| Silo             | `Microsoft.Extensions.Logging.Console`      |
-| Client           | `Microsoft.Extensions.Logging.Console`      |
-| Client           | `Microsoft.Orleans.Client`                  |
-| Grain Interfaces | `Microsoft.Orleans.Core.Abstractions`       |
-| Grain Interfaces | `Microsoft.Orleans.CodeGenerator.MSBuild`   |
-| Grains           | `Microsoft.Orleans.CodeGenerator.MSBuild`   |
-| Grains           | `Microsoft.Orleans.Core.Abstractions`       |
-| Grains           | `Microsoft.Extensions.Logging.Abstractions` |
+| Project          | Nuget Package                                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Silo             | `Microsoft.Orleans.Server`                                                                                                         |
+| Silo             | `Microsoft.Extensions.Logging.Console`                                                                                             |
+| Client           | `Microsoft.Extensions.Logging.Console`                                                                                             |
+| Client           | `Microsoft.Orleans.Client`                                                                                                         |
+| Grain Interfaces | `Microsoft.Orleans.Core.Abstractions`                                                                                              |
+| Grain Interfaces | `在<code>GrainInterfaces`和`Grains`项目中，添加`Microsoft.Orleans.Core.Abstractions`和`Microsoft.Orleans.CodeGenerator.MSBuild`包。</code> |
+| Grains           | `Microsoft.Orleans.CodeGenerator.MSBuild`                                                                                          |
+| Grains           | `Microsoft.Orleans.Core.Abstractions`                                                                                              |
+| Grains           | `Microsoft.Extensions.Logging.Abstractions`                                                                                        |
 
-`Microsoft.Orleans.Server` and `Microsoft.Orleans.Client` are meta-packages that bring dependency that you will most likely need on the Silo and Client side.
+`Microsoft.Orleans.Server`和`Microsoft.Orleans.Client`是元软件包，它们带来了在silos和客户端最可能需要的依赖关系。
 
-`Microsoft.Orleans.Core.Abstractions` is needed everywhere. It included in both `Microsoft.Orleans.Server` and `Microsoft.Orleans.Client`.
+`Microsoft.Orleans.Core.Abstractions`在任何地方都需要。 两者都包含`Microsoft.Orleans.Server`和`Microsoft.Orleans.Client`。
 
-`Microsoft.Orleans.CodeGenerator.MSBuild` automatically generates code that is needed to make calls to grains across machine boundaries. So it is needed in both `GrainInterfaces` and `Grains` projects.
+`Microsoft.Orleans.CodeGenerator.MSBuild`自动生成调用Grains通过机器边界所需的代码。 所以两者都需要`GrainInterfaces`和`Grains`项目。
 
-## Define a Grain Interface
+## 定义grains接口
 
-In the GrainInterfaces project, add a `IHello.cs` code file and define the following IHello interface in it:
+在GrainInterfaces项目中，添加一个`IHello.cs`代码文件，并在其中定义以下IHello接口：
 
 ``` csharp
 using System.Threading.Tasks;
@@ -82,9 +82,9 @@ namespace OrleansBasics
 }
 ```
 
-## Define a Grain Class
+## 定义一个Grains类
 
-In the Grains project, add a `HelloGrain.cs` code file and define the following class in it:
+在Grains项目中，添加一个`HelloGrain.cs`代码文件，并在其中定义以下类：
 
 ``` csharp
 using Microsoft.Extensions.Logging;
@@ -110,11 +110,11 @@ namespace OrleansBasics
 }
 ```
 
-### Create the Silo – Program.cs
+### 创建silos– Program.cs
 
-At this step, we add code to initialize a server that will host and run our grains - a silo. We will use the development clustering provider here, so that we can run everything locally, without a dependency on external storage systems. You can find more information about that in the [Local Development Configuration](~/docs/host/configuration_guide/local_development_configuration.md) page of the Orleans documentation. We will run a cluster with a single silo in it.
+在这一步，我们添加代码用于初始化一个服务-silos，这个服务将托管和运行我们的Grains。 我们将在此处使用开发群集提供程序，以便我们可以在本地运行所有内容，而无需依赖外部存储系统。 您可以在[本地开发配置](http://dotnet.github.io/orleans/Documentation/clusters_and_clients/configuration_guide/local_development_configuration.html)Orleans文档的页面。 我们将在其中运行带有单个silos的集群。
 
-Add the following code to Program.cs of the Silo project:
+将以下代码添加到Silo项目的Program.cs中：
 
 ``` csharp
 using System;
@@ -173,9 +173,9 @@ namespace OrleansBasics
 }
 ```
 
-### Create the Client – Program.cs
+### 创建客户端– Program.cs
 
-Finally, we need to configure a client for communicating with our grains, connect it to the the cluster (with a single silo in it), and invoke the grain. Note that the clustering configuration must match the one we used for the silo. There is more information about the client in the [Clusters and Clients](~/docs/host/index.md) section of the Orleans documentation.
+最后，我们需要配置一个客户端与我们的Grains进行通信，将其连接到集群(其中只有单个silos)，然后调用Grains。 请注意，群集配置必须与我们用于silos的配置匹配。 有关客户端的更多信息，请参见[集群和客户端](http://dotnet.github.io/orleans/Documentation/clusters_and_clients/index.html)Orleans文档中的部分。
 
 ``` csharp
 using Microsoft.Extensions.Logging;
@@ -238,21 +238,21 @@ namespace OrleansBasics
             // example of calling grains from the initialized client
             var friend = client.GetGrain<IHello>(0);
             var response = await friend.SayHello("Good morning, HelloGrain!");
-            Console.WriteLine($"\n\n{response}\n\n");
+            Console.WriteLine("\n\n{0}\n\n", response);
         }
     }
 }
 ```
 
-## Run the application
+## 运行应用程序
 
-Build the solution and run the Silo. After you get the confirmation message that the Silo is running ("Press enter to terminate..."), run the Client. Success looks like this:
+Build the solution and run the Silo. After you get the confirmation message that the Silo is running ("Press enter to terminate..."), run the Client. 成功看起来像这样：
 
 ![](~/images/orleansbasics_success.png)
 
 
-## Further Reading
+## 进一步阅读
 
- - [List of Orleans Packages](~/docs/resources/nuget_packages.md)
- - [Orleans Configuration Guide](~/docs/host/configuration_guide/index.md)
- - [Orleans Best Practices](https://www.microsoft.com/en-us/research/publication/orleans-best-practices)
+ - [Orleans包清单](~/docs/resources/nuget_packages.md)
+ - [Orleans配置指南](~/docs/host/configuration_guide/index.md)
+ - [Orleans最佳实践](https://www.microsoft.com/en-us/research/publication/orleans-best-practices)
