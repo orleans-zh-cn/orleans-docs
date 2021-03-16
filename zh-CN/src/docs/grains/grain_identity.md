@@ -5,13 +5,13 @@ title: Grain Identity
 
 # Grain Identity
 
-In object-oriented environments, the identity of an object is hard to distinguish from a reference to it. Thus, when an object is created using new, the reference you get back represents all aspects of its identity except those that map the object to some external entity that it represents.
+在面向对象的环境中，很难将对象的标识与对其的引用区分开。 因此，当使用new创建对象时，您获得的引用代表其身份的所有方面，除了那些将对象映射到其所代表的外部实体的方面。
 
-In distributed systems, object references cannot represent instance identity, since references are typically limited to a single address space. That is certainly the case for .NET references. Furthermore, a grain must have an identity regardless of whether it is active, so that we can activate it on demand. Therefore grains have a primary key. The primary key can be a Globally Unique Identifier (GUID), a long integer, or a string.
+在分布式系统中，对象引用不能表示实例身份，因为引用通常限于单个地址空间。 .NET引用肯定是这种情况。 此外，无论Grains是否处于活动状态，它都必须具有身份，以便我们可以按需激活它。 因此，Grains具有主键。 主键可以是全局唯一标识符(GUID)，长整数或字符串。
 
-The primary key is scoped to the grain type. Therefore, the complete identity of a grain is formed from the grain's type and its key.
+Grain的主键在其类型中定义。 因此，Grain的完整标识由Grain的类型及其键组成。
 
-The caller of the grain decides which scheme should be used. The options are:
+Grains的调用者决定应使用哪种方案。 选项包括：
 
 * long
 * GUID
@@ -19,21 +19,21 @@ The caller of the grain decides which scheme should be used. The options are:
 * GUID + string
 * long + string
 
-Because the underlying data is the same, the schemes can be used interchangeably. When a long integer is used, a GUID is actually created and padded with zeros.
+因为基础数据是相同的，所以这些方案可以互换使用。 当使用长整数时，实际上会创建一个GUID并用零填充。
 
-Situations that require a singleton grain instance, such as a dictionary or registry, benefit from using `Guid.Empty` as its key. This is merely a convention, but by adhering to this convention it becomes clear at the caller site that a singleton grain is in use, as we saw in the first tutorial.
+需要使用单例Grains实例的情况(例如字典或注册表)可从使用中受益`Guid.Empty`作为其关键。 这仅仅是一个约定，但是通过坚持，正如我们在第一个教程中所看到的，在调用站点处，事情已经很清楚了。
 
-## Using GUIDs
+## 使用GUID
 
-GUIDs are useful when there are several processes that could request a grain, such as a number of web servers in a web farm. You don't need to coordinate the allocation of keys, which could introduce a single point of failure in the system, or a system-side lock on a resource which could present a bottleneck. There is a very low chance of GUIDs colliding, so they would probably be the default choice when architecting an Orleans system.
+当有多个进程可能需要请求grain时，例如Web场中的许多Web服务器，GUID很有用。 您不需要协调主键的分配，这可能会导致系统出现单点故障，也可能不需要对资源进行系统侧锁定就可能造成瓶颈。 GUID发生碰撞的可能性很小，因此在构建Orleans系统时，它们可能是默认选择。
 
-Referencing a grain by GUID in client code:
+在客户端代码中通过GUID引用Grains：
 
 ``` csharp
 var grain = grainFactory.GetGrain<IExample>(Guid.NewGuid());
 ```
 
-Retrieving the primary key from grain code:
+从Grains代码中检索主键：
 
 ``` csharp
 public override Task OnActivateAsync()
@@ -43,17 +43,17 @@ public override Task OnActivateAsync()
 }
 ```
 
-## Using Longs
+## 使用Longs
 
-A long integer is also available, which would make sense if the grain is persisted to a relational database, where numerical indexes are preferred over GUIDs.
+也可以使用一个长整数，如果将Grains持久保存到关系数据库中(在该数据库中数字索引优先于GUID)，这将是有意义的。
 
-Referencing a grain by long integer in client code:
+在客户端代码中通过长整数引用Grains：
 
 ``` csharp
 var grain = grainFactory.GetGrain<IExample>(1);
 ```
 
-Retrieving the primary key from grain code:
+检索主键形式的Grain代码：
 
 ``` csharp
 public override Task OnActivateAsync()
@@ -63,17 +63,17 @@ public override Task OnActivateAsync()
 }
 ```
 
-## Using Strings
+## 使用字符串
 
-A string is also available.
+字符串也是可用的。
 
-Referencing a grain by String in client code:
+在客户端代码中按字符串引用Grains：
 
 ``` csharp
 var grain = grainFactory.GetGrain<IExample>("myGrainKey");
 ```
 
-Retrieving the primary key from grain code:
+检索主键形式的Grain代码：
 
 ``` csharp
 public override Task OnActivateAsync()
@@ -82,11 +82,11 @@ public override Task OnActivateAsync()
     return base.OnActivateAsync();
 }
 ```
-## Using Compound Primary Key
+## 使用复合主键
 
-If you have a system that doesn't fit well with either GUIDs or longs, you can opt for a compound primary key, which allows you to use a combination of a GUID or long and a string to reference a grain.
+如果您的系统与GUID或long均不合适，则可以选择复合主键，该主键允许您使用GUID或long与字符串的组合来引用Grains。
 
-You can inherit your interface from 'IGrainWithGuidCompoundKey' or 'IGrainWithIntegerCompoundKey" interface like this:
+您可以从`IGrainWithGuidCompoundKey`或`IGrainWithIntegerCompoundKey`接口继承接口，如下所示：
 
 ``` csharp
 public interface IExampleGrain : Orleans.IGrainWithIntegerCompoundKey
@@ -95,13 +95,13 @@ public interface IExampleGrain : Orleans.IGrainWithIntegerCompoundKey
 }
 ```
 
-In client code, this adds a second argument to the `GetGrain` method on the grain factory:
+在客户端代码中，这会向`GetGrain`粮厂的方法。
 
 ``` csharp
 var grain = grainFactory.GetGrain<IExample>(0, "a string!", null);
 ```
 
-To access the compound key in the grain, we can call an overload on the `GetPrimaryKey` method:
+要访问Grains中的复合键，我们可以在`GetPrimaryKey`方法：
 
 ``` csharp
 public class ExampleGrain : Orleans.Grain, IExampleGrain
