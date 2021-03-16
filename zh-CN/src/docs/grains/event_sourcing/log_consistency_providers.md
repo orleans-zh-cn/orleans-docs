@@ -3,36 +3,36 @@ layout: page
 title: Log-Consistency Providers
 ---
 
-# Built-In Log-Consistency Providers
+# 内置日志一致性提供程序
 
-The `Microsoft.Orleans.EventSourcing` package includes several log-consistency providers that cover basic scenarios suitable to get started, and allow some extensibility.
+的`Microsoft.Orleans.EventSourcing`该软件包包括几个日志一致性提供程序，这些提供程序涵盖了适合入门的基本方案，并具有一定的可扩展性。
 
 
-### Orleans.EventSourcing.**StateStorage**.LogConsistencyProvider
+### Orleans.EventSourcing.**StateStorage**.LogConsistencyProvide
 
-This provider stores *grain state snapshots*, using a standard storage provider that can be configured independently.
+该提供商存储*grains状态快照*，使用可以独立配置的标准存储提供程序。
 
-The data that is kept in storage is an object that contains both the grain state (as specified by the first type parameter to `JournaledGrain`) and some meta-data (the version number, and a special tag that is used to avoid duplication of events when storage accesses fail).
+保留在存储中的数据是一个对象，它既包含Grain状态(由第一个type参数指定为`JournaledGrain`)和一些元数据(版本号，以及用于避免存储访问失败时事件重复的特殊标记)。
 
-Since the entire grain state is read/written every time we access storage, this provider is not suitable for objects whose grain state is very large.
+由于每次访问存储时都会读取/写入整个grains状态，因此此提供程序不适用于grains状态非常大的对象。
 
-This provider does not support `RetrieveConfirmedEvents`: it cannot retrieve the events from storage because the events are not persisted.
+该提供者不支持`RetrieveConfirmedEvents`(检索已确认事件)：它不能从存储中检索事件，因为事件没有持久化。
 
-### Orleans.EventSourcing.**LogStorage**.LogConsistencyProvider
+### Orleans.EventSourcing。 **LogStorage**.LogConsistencyProvider
 
-This provider stores *the complete event sequence as a single object*, using a standard storage provider that can be configured independently.
+该提供商存储*完整的事件序列作为单个对象*，使用可以独立配置的标准存储提供程序。
 
-The data that is kept in storage is an object that contains a `List<EventType> object`, and some meta-data (a special tag that is used to avoid duplication of events when storage accesses fail).
+保留在存储中的数据是一个包含以下内容的对象：`List <EventType> object`以及一些元数据(一个特殊的标记，用于在存储访问失败时避免事件重复)。
 
-This provider does support `RetrieveConfirmedEvents`. All events are always available and kept in memory.
+该提供者确实支持`RetrieveConfirmedEvents`. 所有事件始终可用并保存在内存中。 All events are always available and kept in memory.
 
-Since the whole event sequence is read/written every time we access storage, this provider is _not suitable for use in production_, unless the event sequences are guaranteed to remain pretty short. The main purpose of this provider is to illustrate the semantics of the event sourcing, and for samples/testing environments.
+由于每次访问存储时都会读取/写入整个事件序列，因此此提供程序是*不适合在生产中使用*，除非保证事件序列保持很短。 此提供程序的主要目的是说明事件源的语义，以及用于示例/测试环境的语义。
 
 ### Orleans.EventSourcing.**CustomStorage**.LogConsistencyProvider
 
-This provider allows the developer to plug in their own storage interface, which is then called by the conistency protocol at appropriate times. This provider does not make specific assumptions about whether what is stored are state snapshots or events - the programmer assumes control over that choice (and may store either or both).
+此提供程序允许开发人员插入自己的存储接口，然后在适当的时间由conistency协议调用。 这个提供程序不会对存储的内容是状态快照还是事件做出特定的假设—程序员可以控制这个选择(并且可以存储其中一个或两个)。
 
-To use this provider, a grain must derive from `JournaledGrain<StateType,EventType>`, as before, but additionally must also implement the following interface:
+要使用此提供程序，必须从`JournaledGrain<StateType, EventType>`，但还必须实现以下接口：
 
 ```csharp
 public interface ICustomStorageInterface<StateType, EventType>
@@ -42,13 +42,13 @@ public interface ICustomStorageInterface<StateType, EventType>
    Task<bool> ApplyUpdatesToStorage(IReadOnlyList<EventType> updates, int expectedversion);
 }
 ```
-The consistency provider expects these to behave a certain way. Programmers should be aware that:
+一致性提供程序希望它们以某种方式运行。 程序员应该意识到：
 
-* The first method, `ReadStateFromStorage`, is expected to return both the version, and the state read. If there is nothing stored yet, it should return zero for the version and a state that matches corresponds to the default constructor for `StateType`.
+* 第一种方法，`ReadStateFromStorage`，应同时返回版本和状态read。 如果尚未存储任何内容，则应为版本返回零，并返回与的默认构造函数相匹配的状态`状态类型`.
 
-* `ApplyUpdatesToStorage` must return false if the expected version does not match the actual version (this is analogous to an e-tag check).
+* `ApplyUpdatesToStorage`如果预期版本与实际版本不匹配，则必须返回false(这类似于e-tag检查)。
 
-* If `ApplyUpdatesToStorage` fails with an exception, the consistency provider retries. This means some events could be duplicated if such an exception is thrown, but the event was actually persisted. The developer is responsible to make sure this is safe: e.g. either avoid this case by not throwing an exception, or ensure duplicated events are harmless for the application logic, or add some extra mechanism to filter duplicates.
+* 如果`ApplyUpdatesToStorage`失败，但出现异常，一致性提供程序将重试。 这意味着如果抛出这样的异常，某些事件可能会被复制，但事件实际上是持久化的。 开发人员负责确保这是安全的：例如，要么通过不引发异常来避免这种情况，要么确保重复事件对应用程序逻辑无害，要么添加一些额外的机制来过滤重复项。
 
-This provider does not support `RetrieveConfirmedEvents`. Of course, since the developer controls the storage interface anyway, they don't need to call this in the first place, but can implement their own event retrieval.
+This provider does not support `RetrieveConfirmedEvents`. 此提供程序不支持`RetrieveConfirmedEvents`. 当然，由于开发人员无论如何都控制着存储接口，所以他们不需要首先调用这个接口，而是可以实现自己的事件检索。
 
