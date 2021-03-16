@@ -1,9 +1,9 @@
 ---
 layout: page
-title: What's new in Orleans
+title: Orleans有什么新功能？
 ---
 
-# Orleans有什么新鲜事？
+# Orleans有什么新功能？
 
 ## [v2.3.2版](https://github.com/dotnet/orleans/releases/tag/v2.3.2)2019年5月9日
 
@@ -16,12 +16,12 @@ title: What's new in Orleans
 ## [v2.3.0版](https://github.com/dotnet/orleans/releases/tag/v2.3.0)2019年3月20日
 
 - 主要改进
-  - 支持`IHostEnvironmentStatistics`在Linux上，它支持CPU和内存指标以及负载削减。 感谢@martinothamar！
+  - 支持ASP.NET Core主机 API (Microsoft.Extensions.Hosting)。 感谢@martinothamar！
   - 将命名选项的自定义实现替换为Microsoft.Extensions.Options.
   - EventHub流提供程序已升级到EvenHub 2.2.1，并与3.0.0兼容。
   - 集群成员关系表中的旧死条目现在会自动清理，这对于托管使用新IP端点来重新启动silos的环境很有帮助。
   - 默认情况下，允许在思洛进程中有效托管前端代码的托管客户端。
-  - Support for `IHostEnvironmentStatistics` on Linux, which enables CPU and memory metrics as well as load shedding. Thanks to @martinothamar!
+  - Support for `IHostEnvironmentStatistics` on Linux, which enables CPU and memory metrics as well as load shedding. 感谢@martinothamar！
 
 ## [v2.3.0-rc2版](https://github.com/dotnet/orleans/releases/tag/v2.3.0-rc2)2019年3月13日
 
