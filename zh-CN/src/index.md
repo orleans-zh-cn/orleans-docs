@@ -4,14 +4,14 @@
 
 [![NuGet](https://img.shields.io/nuget/v/Microsoft.Orleans.Core.svg?style=flat)](http://www.nuget.org/profiles/Orleans) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-### Orleans is a cross-platform framework for building robust, scalable distributed applications
+### Orleans是一个跨平台框架，用于构建健壮，可扩展的分布式应用程序
 
-Orleans builds on the developer productivity of .NET and brings it to the world of distributed applications, such as cloud services. Orleans scales from a single on-premises server to globally distributed, highly-available applications in the cloud.
+Orleans建立在.NET开发人员生产力的基础上，并将其带入了分布式应用程序的世界，例如云服务。 Orleans可从单个本地服务器扩展到云中全局分布的高可用性应用程序。
 
-Orleans takes familiar concepts like objects, interfaces, async/await, and try/catch and extends them to multi-server environments. As such, it helps developers experienced with single-server applications transition to building resilient, scalable cloud services and other distributed applications. For this reason, Orleans has often been referred to as "Distributed .NET".
+Orleans采用了对象，接口，async/await和try/catch等熟悉的概念，并将其扩展到多服务器环境。 这样，它可以帮助具有单服务器应用程序经验的开发人员过渡到构建弹性，可扩展的云服务和其他分布式应用程序。 因此，Orleans通常被称为“分布式.NET”。
 
-It was created by [Microsoft Research](http://research.microsoft.com/projects/orleans/) and introduced the [Virtual Actor Model](http://research.microsoft.com/apps/pubs/default.aspx?id=210931) as a novel approach to building a new generation of distributed systems for the Cloud era. The core contribution of Orleans is its programming model which tames the complexity inherent to highly-parallel distributed systems without restricting capabilities or imposing onerous constraints on the developer.
+它是由[Microsoft Research](http://research.microsoft.com/projects/orleans/) 创建的，并介绍了[Virtual Actor Model](http://research.microsoft.com/apps/pubs/default.aspx?id=210931)作为一种新方法来构建面向云时代的新一代分布式系统。 Orleans的核心贡献是它的编程模型，它在不限制功能，以及对开发人员施加繁重约束的情况下，降低了高并发分布式系统固有的复杂性。
 
-Documentation is located [here](~/docs/index.md)
+文档位于[此处](Documentation/index.md)。
 
-Chinese translation of the documentation can be found here [here](https://orleans.azurewebsites.net)
+可以在这里找到文档的中文翻译 [在这里](https://orleans.azurewebsites.net)
