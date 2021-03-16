@@ -1,32 +1,24 @@
-# Orleans documentation
+# Orleans 中文文档库
 
-[Orleans' documentation is published here,](https://dotnet.github.io/orleans/)
+欢迎来到 Orleans 中文文档库。
 
-## Building the documentation
+该文档库是由 orleans-zh-cn 创建，并用于 https://dotnet.github.io/orleans 站点的中文翻译。
+您可以通过以下地址查看到翻译后发布的最新内容：
 
-To build the documentation you will need a copy of [DocFX](https://dotnet.github.io/docfx/) on your path.
-Alternatively, on Windows, you can run `dotnet build src` to build the documentation using a version of DocFx from NuGet.
+https://orleans-zh-cn.github.io/
 
-If you're on Linux/OSX you can run DocFX with Mono.
 
-To build the documentation, run:
+# 简单三步，成为贡献者
 
-```
-> docfx src\docfx.json
-```
 
-To view the documentation:
+1. 点击链接 https://crwd.in/orleanscndocs 在 crowdin.com 上加入该翻译项目。过程中将会需要填写一些您个人的信息。
+2. 点击链接 https://crowdin.com/project/orleanscndocs/zh-CN 查看并选择您感兴趣的未翻译内容。
+3. 如下图所示，提交一段您的翻译建议。我们将会定时审阅您的翻译内容。并发布到站点中。
 
-```
-> docfx serve
-```
 
-You'll then be able to browse the website on [http://localhost:8080](http://localhost:8080)
+![](https://user-images.githubusercontent.com/12607748/111313778-b59dc280-869b-11eb-93fc-dafa2bd06e91.png)
 
-## Editing the Documentation
 
-Please edit the markdown files in the `src` directory.
 
-The `toc.yml` files are used to create the menus. Any new markdown files you add will need to be included in the appropriate `toc.yml` file. This may include the `toc.yml` file at the same level in the directory structure, and possibly in the parent directory too.
+> crowdin 是一款针对开源项目免费的翻译协作软件，可以帮助您有效的进行多人翻译项目的协作管理。您也可以借助在本项目中的使用体验来应用到自己的项目中。
 
-All files (both markdown and html) are added to git.
