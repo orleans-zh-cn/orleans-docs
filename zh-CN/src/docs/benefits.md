@@ -3,60 +3,60 @@ layout: page
 title: Main Benefits
 ---
 
-# Benefits
+# 好处
 
-The main benefits of Orleans are: **developer productivity**, even for non-expert programmers, and **transparent scalability by default** with no special effort from the programmer. We expand on both of these benefits below.
+Orleans的主要好处是：**开发人员生产力**，即使对于非专业程序员也是如此，**默认情况下透明的可伸缩性**不需要程序员的特别努力。 我们在下面对这两个好处进行了扩展。
 
-## Developer Productivity
+## 开发人员生产力
 
-The Orleans programming model raises productivity of both expert and non-expert programmers by providing the following key abstractions, guarantees, and system services.
+Orleans编程模型通过提供以下关键抽象、保证和系统服务，提高了专家和非专家程序员的生产率。
 
 * **Familiar object-oriented programming (OOP) paradigm**.
 
-Grains are .NET classes that implement declared .NET grain interfaces with asynchronous methods. Thus, grains appear to the programmer as remote objects whose methods can be directly invoked. This provides the programmer the familiar OOP paradigm by turning method calls into messages, routing them to the right endpoints, invoking the target grain's methods, and dealing with failures and corner cases in a completely transparent way.
+grains是用异步方法实现声明的.net grain接口的.net类。 因此，在程序员看来，grains是可以直接调用其方法的远程对象。 通过将方法调用转换为消息、将它们路由到正确的端点、调用目标Grain的方法以及以完全透明的方式处理失败和角落情况，这为程序员提供了熟悉的oop范例。
 
 * **Single-threaded execution of grains**.
 
-The runtime guarantees that a grain never executes on more than one thread at a time. Combined with the isolation from other grains, the programmer never faces concurrency at the grain level, and never needs to use locks or other synchronization mechanisms to control access to shared data. This feature alone makes development of distributed applications tractable for non-expert programmers.
+运行时保证一个Grain一次不会在多个线程上执行。 再加上与其他Grain的隔离，程序员永远不会在Grain级别面临并发，也不需要使用锁或其他同步机制来控制对共享数据的访问。 仅此特性就使得分布式应用程序的开发对于非专家程序员来说是容易的。
 
 * **Transparent activation**.
 
-The runtime activates a grain only when there is a message for it to process. This cleanly separates the notion of creating a reference to a grain, which is visible to and controlled by application code, and physical activation of the grain in memory, which is transparent to the application. In many ways, this is similar to virtual memory in that it decides when to “page out” (deactivate) or “page in” (activate) a grain; the application has uninterrupted access to the full “memory space” of logically created grains, whether or not they are in the physical memory at any particular point in time. Transparent activation enables dynamic, adaptive load balancing via placement and migration of grains across the pool of hardware resources. This features is a significant improvement on the traditional actor model, in which actor lifetime is application-managed.
+运行时仅当有要处理的消息时才激活Grains。 这将创建对应用程序代码可见并由其控制的grain的引用的概念与对应用程序透明的内存中grain的物理激活的概念完全分离。 在许多方面，这类似于虚拟内存，因为它决定何时“换出页”(停用)或“置入页”(激活)一个grains；应用程序可以不间断地访问逻辑创建的grains的全部“内存空间”，无论它们是否在任何特定时间点位于物理内存中。 透明激活通过在硬件资源池中存储和迁移Grain实现动态、自适应的负载平衡。 这个特性是对传统的actor模型的一个重大改进，其中actor生命周期是由应用程序管理的。
 
 * **Location transparency**.
 
-A grain reference (proxy object) that the programmer uses to invoke the grain's methods or pass to other components contains only the logical identity of the grain. The translation of the grain's logical identity to its physical location and the corresponding routing of messages are done transparently by the Orleans runtime. Application code communicates with grains while remaining oblivious to their physical location, which may change over time due to failures or resource management or because a grain is deactivated at the time it is called.
+程序员用来调用grain方法或传递给其他组件的grain引用(代理对象)只包含grain的逻辑标识。 Grains逻辑标识到其物理位置的转换和相应的消息路由是由orleans运行时透明完成的。 应用程序代码与grain进行通信，而不注意它们的物理位置，这可能会随着时间的推移而改变，原因是失败或资源管理，或者是grain在调用时被停用。
 
-* **Transparent integration with persistent store**.
+* 与持久存储的透明集成
 
-Orleans allows for declarative mapping of a grain's in-memory state to a persistent store. It synchronizes updates, transparently guaranteeing that callers receive results only after the persistent state has been successfully updated. Extending and/or customizing the set of existing persistent storage providers available is straight-forward.
+orleans允许声明性地将grain的内存状态映射到持久化存储。 它同步更新，透明地确保调用方仅在成功更新持久状态后才能接收结果。 扩展和/或定制现有持久存储提供程序集是直截了当的。
 
 * **Automatic propagation of errors**.
 
-The runtime automatically propagates unhandled errors up the call chain with the semantics of asynchronous and distributed try/catch. As a result, errors do not get lost within an application.
+运行时使用异步和分布式try/catch的语义自动将未处理的错误传播到调用链上。 因此，错误不会在应用程序中丢失。
 
-This allows the programmer to put error handling logic at the appropriate places, without the tedious work of manually propagating errors at each level.
+这允许程序员将错误处理逻辑放在适当的位置，而无需在每个级别手动传播错误的繁琐工作。
 
-### Transparent Scalability by Default
+### 默认情况下透明的可伸缩性
 
-The Orleans programming model is designed to guide the programmer down a path of likely success in scaling an application or service through several orders of magnitude. This is done by incorporating proven best practices and patterns and by providing an efficient implementation of the lower level system functionality. Here are some key factors that enable scalability and performance:
+orleans编程模型旨在引导程序员在几个数量级上成功地扩展应用程序或服务。 这是通过结合经验证的最佳实践和模式以及通过提供较低级别系统功能的有效实现来实现的。 以下是实现可伸缩性和性能的一些关键因素：
 
 * **Implicit fine grain partitioning of application state**.
 
-By using grains as directly addressable entities, the programmer implicitly breaks down the overall state of their application. While the Orleans programming model does not prescribe how big or small a grain should be, in most cases it makes sense to have a relatively large number of grains – millions or more – with each representing a natural entity of the application, such as a user account or a purchase order. With grains being individually addressable and their physical location abstracted away by the runtime, Orleans has enormous flexibility in balancing load and dealing with hot spots in a transparent and generic way without any thought from the application developer.
+通过使用Grain作为直接可寻址的实体，程序员隐式地分解了应用程序的整体状态。 虽然Orleans编程模型没有规定Grains应该有多大或多小，但在大多数情况下，拥有相对较大数量的Grains(数百万或更多)是有意义的，每个Grains代表应用程序的自然实体，如用户帐户或采购订单。 由于grains是独立可寻址的，而物理位置是由运行时抽象出来的，因此Orleans在以透明和通用的方式负载均衡和热点处理方面具有极大的灵活性，而不需要应用程序开发人员关心这个问题。
 
 * **Adaptive resource management**.
 
-Grains make no assumption about the locality of other grains as they interact with them. Because of this location transparency, the runtime can manage and adjust allocation of available hardware resources in a dynamic way. The runtime does this by making fine-grained decisions on placement and migration of grains across the compute cluster in reaction to load and communication patterns - without failing incoming requests. By creating multiple replicas of a particular grain, the runtime can increase throughput of the grain without making any changes to the application code.
+Grains与其他Grains相互作用时，不会假设它们的位置。 由于这种位置透明性，运行时可以动态地管理和调整可用硬件资源的分配。 运行时通过针对负载和通信模式在计算集群中对Grain的存储和迁移做出细Grain的决策来实现这一点，而不会使传入的请求失败。 通过创建特定Grain的多个副本，运行时可以在不更改应用程序代码的情况下提高Grain的吞吐量。
 
 * **Multiplexed communication**.
 
-Grains in Orleans have logical endpoints, and messaging among them is multiplexed across a fixed set of all-to-all physical connections (TCP sockets). This allows the runtime to host millions of addressable entities with low OS overhead per grain. In addition, activation and deactivation of a grain does not incur the cost of registering/unregistering of a physical endpoint, such as a TCP port or HTTP URL, or even closing a TCP connection.
+Orleans的Grains有逻辑端点，它们之间的消息传递通过一组固定的全对所有物理连接(TCP套接字)进行多路复用。 这允许运行时对于每个grain以较低的操作系统开销托管数百万个可寻址实体。 此外，Grains的激活和停用不会产生注册/注销物理端点(如TCP端口或HTTP URL)或甚至关闭TCP连接的成本。
 
 * **Efficient scheduling**.
 
-The runtime schedules execution of a large number of single-threaded grains across a custom thread pool with a thread per physical processor core. With grain code written in the non-blocking, continuation-based style (a requirement of the Orleans programming model), application code runs in a very efficient “cooperative” multi-threaded manner with no contention. This allows the system to reach high throughput and run at very high CPU utilization (up to 90%+) with great stability. The fact that a growth in the number of grains in the system and an increase in the load does not lead to additional threads or other OS primitives helps scalability of individual nodes and the whole system.
+运行时计划在每个物理处理器内核一个线程的自定义线程池中执行大量单线程Grain。 使用以非阻塞、基于连续性的风格(Orleans编程模型的要求)编写的Grain代码，应用程序代码以非常高效的“协作”多线程方式运行，没有争用。 这使得系统能够达到高吞吐量，并以非常高的CPU利用率(高达90%+)运行，具有极大的稳定性。 系统中grains数量的增长和负载的增加不会导致额外的线程或其他操作系统原语，这一事实有助于单个节点和整个系统的可伸缩性。
 
 * **Explicit asynchrony**.
 
-The Orleans programming model makes the asynchronous nature of a distributed application explicit and guides programmers to write non-blocking asynchronous code. Combined with asynchronous messaging and efficient scheduling, this enables a large degree of distributed parallelism and overall throughput without the explicit use of multi-threading.
+orleans编程模型使分布式应用程序的异步特性变得明确，并指导程序员编写非阻塞异步代码。 结合异步消息传递和高效的调度，这使得无需显式地使用多线程就可以实现很大程度的分布式并行性和总吞吐量。
