@@ -30,13 +30,13 @@ jobs:
 #         BUILD_DIR: _site # docfx's default output directory is _site
 #         GH_PAT: ${{ secrets.GH_PAT }} # See https://github.com/maxheld83/ghpages
         
-    - name: Pushes to another repository
-      uses: orleans-zh-cn/orleans-zh-cn.github.io@main
-      env:
-        API_TOKEN_GITHUB: ${{ secrets.GH_PAT }}
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.0
       with:
-        source-directory: _site
-        user-email: ysjshengjie@live.cn
+       branch: main
+       repository-name: orleans-zh-cn/orleans-zh-cn.github.io
+       folder: _site
+       ssh-key: ${{ secrets.DEPLOY_KEY }}
         
         
         
