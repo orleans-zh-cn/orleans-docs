@@ -1,12 +1,12 @@
-# Backward compatibility guidelines
+# 向后兼容准则
 
-Writing backward compatible code can be hard and difficult to test.
+编写向后兼容的代码可能很难测试。
 
-## Never change the signature of existing methods
+## 永远不要更改现有方法的签名
 
-Because of the way on how Orleans serializer work, you should never change the signature of existing methods.
+由于Orleans序列化程序的工作方式，您永远不应该更改现有方法的签名。
 
-The following example is correct:
+以下示例是正确的：
 
 ``` cs
 [Version(1)]
@@ -28,7 +28,7 @@ public interface IMyGrain : IGrainWithIntegerKey
 }
 ```
 
-This is not correct:
+这是不正确的：
 ``` cs
 [Version(1)]
 public interface IMyGrain : IGrainWithIntegerKey
@@ -46,7 +46,7 @@ public interface IMyGrain : IGrainWithIntegerKey
 }
 ```
 
-**NOTE**: you should not do this change in your code, as it's an example of a bad practice that leads to very bad side-effects. This is an example of what can happen if you just rename the parameter names: let's say that we have the two following interface version deployed in the cluster:
+**注意**：您不应在代码中进行此更改，因为这是导致非常糟糕的副作用的不良实践的示例。 这是一个如果您只重命名参数名会发生什么的示例：假设我们在集群中部署了以下两个接口版本：
 ``` cs
 [Version(1)]
 public interface IMyGrain : IGrainWithIntegerKey
@@ -64,19 +64,19 @@ public interface IMyGrain : IGrainWithIntegerKey
 }
 ```
 
-This methods seems identical. But if the client was called with V1, and the request is handled by a V2 activation:
+这种方法似乎是相同的。 但是，如果使用V1调用客户端，并且请求由V2激活处理：
 ``` cs
 var grain = client.GetGrain<IMyGrain>(0);
 var result = await grain.Substract(5, 4); // Will return "-1" instead of expected "1"
 ```
 
-This is due to how the internal Orleans serializer works.
+这是由于内部Orleans序列化程序是如何工作的。
 
-## Avoid changing existing method logic
+## 避免改变现有的方法逻辑
 
-It can seems obvious, but you should be very careful when changing the body of an existing method. Unless you are fixing a bug, it is better to just add a new method if you need to modify the code.
+这看起来很明显，但是在更改现有方法的主体时应该非常小心。 除非您正在修复一个bug，否则如果您需要修改代码，最好只添加一个新方法。
 
-Example:
+例子：
 ``` cs
 // V1
 public interface MyGrain : IMyGrain
@@ -108,30 +108,30 @@ public interface MyGrain : IMyGrain
 }
 ```
 
-## Do not remove methods from grain interfaces
+## 不要从grain接口删除方法
 
-Unless you are sure that they are no longer used, you should not remove methods from the grain interface. If you want to remove methods, this should be done in 2 steps:
-1. Deploy V2 grains, with V1 method marked as `Obsolete`
+除非确定不再使用这些方法，否则不应从grain接口中删除方法。 如果要删除方法，应该分两步完成：1。
+1. 当您确定没有进行V1调用时(实际上V1不再部署在正在运行的集群中)，则在部署V3时删除V1方法
 
   ``` cs
-  [Version(1)]
-  public interface IMyGrain : IGrainWithIntegerKey
-  {
-    // First method
-    Task MyMethod(int arg);
-  }
+  [Version(3)]
+    public interface IMyGrain : IGrainWithIntegerKey
+    {
+      // New method added in V2
+      Task MyNewMethod(int arg, obj o);
+    }
   ```
   ``` cs
   [Version(2)]
-  public interface IMyGrain : IGrainWithIntegerKey
-  {
-    // Method inherited from V1
-    [Obsolete]
-    Task MyMethod(int arg);
+public interface IMyGrain : IGrainWithIntegerKey
+{
+  // Method inherited from V1
+  [Obsolete]
+  Task MyMethod(int arg);
 
-    // New method added in V2
-    Task MyNewMethod(int arg, obj o);
-  }
+  // New method added in V2
+  Task MyNewMethod(int arg, obj o);
+}
   ```
 
 2. When you are sure that no V1 calls are made (effectively V1 is no longer deployed in the running cluster), deploy V3 with V1 method removed
