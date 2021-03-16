@@ -23,9 +23,21 @@ jobs:
       with:
         args: src/docfx.json
 
-    # Publish generated site using GitHub Pages
-    - uses: maxheld83/ghpages@master
-      name: Publish Documentation on GitHub Pages
+#     # Publish generated site using GitHub Pages
+#     - uses: maxheld83/ghpages@master
+#       name: Publish Documentation on GitHub Pages
+#       env:
+#         BUILD_DIR: _site # docfx's default output directory is _site
+#         GH_PAT: ${{ secrets.GH_PAT }} # See https://github.com/maxheld83/ghpages
+        
+    - name: Pushes to another repository
+      uses: orleans-zh-cn/orleans-zh-cn.github.io@master
       env:
-        BUILD_DIR: _site # docfx's default output directory is _site
-        GH_PAT: ${{ secrets.GH_PAT }} # See https://github.com/maxheld83/ghpages
+        API_TOKEN_GITHUB: ${{ secrets.GH_PAT }}
+      with:
+        source-directory: _site
+        user-email: ysjshengjie@live.cn
+        
+        
+        
+        
