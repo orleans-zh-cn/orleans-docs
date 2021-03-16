@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Developing a Grain
+title: Persistence
 ---
 
-# Setup
+# 持久化
 
 Before you write code to implement a grain class, create a new Class Library project targeting .NET Standard or .Net Core (preferred) or .NET Framework 4.6.1 or higher (if you cannot use .NET Standard or .NET Core due to dependencies). Grain interfaces and grain classes can be defined in the same Class Library project, or in two different projects for better separation of interfaces from implementation. In either case, the projects need to reference `Microsoft.Orleans.Core.Abstractions` and `Microsoft.Orleans.CodeGenerator.MSBuild` NuGet packages.
 
@@ -84,7 +84,7 @@ public Task GrainMethod2()
 }
 ```
 
-A grain method marked as `async` returns the value directly:
+即使它们是同一类型，不同的Grain类型也可以使用不同的配置存储提供程序：例如，两个不同的Azure Table Storage提供程序实例连接到不同的Azure存储帐户。
 
 ```csharp
 public async Task<SomeType> GrainMethod3()
@@ -94,7 +94,7 @@ public async Task<SomeType> GrainMethod3()
 }
 ```
 
-A "void" grain method marked as `async` that returns no value simply returns at the end of its execution:
+当激活grains时，将自动读取grains状态，但是grains负责在必要时显式触发任何更改的grains状态的写入。
 
 ```csharp
 public async Task GrainMethod4()
@@ -128,7 +128,7 @@ public Task GrainMethod6()
 
 `ValueTask<T>` can be used instead of `Task<T>`
 
-### Grain Reference
+### 读取状态
 
 A Grain Reference is a proxy object that implements the same grain interface as the corresponding grain class. It encapsulates the logical identity (type and unique key) of the target grain. A grain reference is used for making calls to the target grain. Each grain reference is to a single grain (a single instance of the grain class), but one can create multiple independent references to the same grain.
 
@@ -136,26 +136,45 @@ Since a grain reference represents the logical identity of the target grain, it 
 
 A grain reference can be obtained by passing the identity of a grain to the `GrainFactory.GetGrain<T>(key)` method, where `T` is the grain interface and `key` is the unique key of the grain within the type.
 
-The following are examples of how to obtain a grain reference of the `IPlayerGrain` interface defined above.
+见[失败模式](#FailureModes)以下部分提供了有关错误处理机制的详细信息。
 
 From inside a grain class:
 
 ```csharp
-    //construct the grain reference of a specific player
-    IPlayerGrain player = GrainFactory.GetGrain<IPlayerGrain>(playerId);
+    public class UserGrain : Grain, IUserGrain
+{
+  private readonly IPersistentState<ProfileState> _profile;
+
+  public UserGrain([PersistentState("profile", "profileStore")] IPersistentState<ProfileState> profile)
+  {
+    _profile = profile;
+  }
+
+  public Task<string> GetNameAsync() => Task.FromResult(_profile.State.Name);
+
+  public async Task SetNameAsync(string name)
+  {
+    _profile.State.Name = name;
+    await _profile.WriteStateAsync();
+  }
+}
 ```
 
-From Orleans Client code.
+在Grains可以使用持久化之前，必须在silos上配置存储提供程序。
 
 ```csharp
-    IPlayerGrain player = client.GetGrain<IPlayerGrain>(playerId);
+    [StorageProvider(ProviderName="store1")]
+public class MyGrain : Grain<MyGrainState>, /*...*/
+{
+  /*...*/
+}
 ```
 
-### Grain Method Invocation
+### 写入状态
 
-The Orleans programming model is based on [Asynchronous Programming](https://docs.microsoft.com/en-us/dotnet/csharp/async).
+首先，配置存储提供程序：
 
-Using the grain reference from the previous example, here's how to perform a grain method invocation:
+现在，已经使用名称配置了存储提供程序`“ profileStore”`，我们可以从Grains访问此提供程序。
 
 ```csharp
 //Invoking a grain method asynchronously
@@ -187,6 +206,6 @@ await joinedTask;
 // Execution of the rest of the method will continue asynchronously after joinedTask is resolve.
 ```
 
-### Virtual methods
+### 状态清理
 
-A grain class can optionally override `OnActivateAsync` and `OnDeactivateAsync` virtual methods; these are invoked by the Orleans runtime upon activation and deactivation of each grain of the class. This gives the grain code a chance to perform additional initialization and cleanup operations. An exception thrown by `OnActivateAsync` fails the activation process. While `OnActivateAsync`, if overridden, is always called as part of the grain activation process, `OnDeactivateAsync` is not guaranteed to get called in all situations, for example, in case of a server failure or other abnormal event. Because of that, applications should not rely on `OnDeactivateAsync` for performing critical operations such as persistence of state changes. They should use it only for best-effort operations.
+A grain class can optionally override `OnActivateAsync` and `OnDeactivateAsync` virtual methods; these are invoked by the Orleans runtime upon activation and deactivation of each grain of the class. This gives the grain code a chance to perform additional initialization and cleanup operations. 该状态将在`OnActivateAsync`调用。 While `OnActivateAsync`, if overridden, is always called as part of the grain activation process, `OnDeactivateAsync` is not guaranteed to get called in all situations, for example, in case of a server failure or other abnormal event. Because of that, applications should not rely on `OnDeactivateAsync` for performing critical operations such as persistence of state changes. They should use it only for best-effort operations.
