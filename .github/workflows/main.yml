@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v1
    
     - name: Copy 🚀
-      run: cp cp -rfb zh-CN/* .
+      run: cp -rfb zh-CN/* .
       
     # ...
     - uses: nikeee/docfx-action@v1.0.0
