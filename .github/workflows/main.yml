@@ -6,7 +6,7 @@ name: Build doc
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ zh-cn ]
 #   pull_request:
 #     branches: [ docs ]
 
@@ -17,6 +17,10 @@ jobs:
     name: A job to build docfx doc
     steps:
     - uses: actions/checkout@v1
+   
+    - name: Copy 🚀
+      run: cp cp -rfb zh-CN/* .
+      
     # ...
     - uses: nikeee/docfx-action@v1.0.0
       name: Build Documentation
