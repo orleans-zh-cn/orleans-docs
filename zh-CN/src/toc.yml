@@ -1,7 +1,10 @@
 ---
-- name: 文档 
+- 
+  name: 文档
   href: docs/index.md
-- name: 博客 
+- 
+  name: 博客
   href: blog/index.md
-- name: 参与翻译 
+- 
+  name: 参与翻译
   href: https://crwd.in/orleanscndocs
