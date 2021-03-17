@@ -1,4 +1,6 @@
-- name: Documentation 
+- name: 文档 
   href: docs/index.md
-- name: Blog 
+- name: 博客 
   href: blog/index.md
+- name: 参与翻译 
+  href: https://crwd.in/orleanscndocs
