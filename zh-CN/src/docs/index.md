@@ -13,9 +13,9 @@ Orleans采用了对象，接口，async/await和try/catch等熟悉的概念，�
 
 ## Grains
 
-![A grain is composed of a stable identity, behavior, and state](~/images/grain_formulation.svg)
+![Grain由稳定的身份、行为和状态组成。](~/images/grain_formulation.svg)
 
-任何Orleans应用程序的基本构建块都是*grain*. Grains are entities comprising user-defined identity, behavior, and state. grains标识是用户定义的键，使grains始终可供调用。 Grains可以通过强类型通信接口(contract)被其他Grains或Web前端等外部客户端调用。 每个grains都是实现一个或多个这些接口的类的一个实例。
+任何Orleans应用程序的基本构建块都是*grain*. Grains是由用户定义的身份、 行为和状态组成的实体。 grains标识是用户定义的键，使grains始终可供调用。 Grains可以通过强类型通信接口(contract)被其他Grains或Web前端等外部客户端调用。 每个grains都是实现一个或多个这些接口的类的一个实例。
 
 Grains可以具有挥发性和/或持久化状态，可以存储在任何存储系统中。 因此，grains隐式地划分应用程序状态，从而实现自动可伸缩性并简化故障恢复。 当Grain处于活动状态时，Grain状态被保存在内存中，从而降低了延迟和数据存储的负载。
 
@@ -116,7 +116,7 @@ Orleans提供了一个简单的持久化模型，确保在处理请求之前，�
 
 ### 灵活的Grains存储
 
-当一个Grains在Orleans被激活时，运行时决定在哪个服务器(silos)上激活该Grains。 This is called grain placement. Orleans的布局过程是完全可配置的：开发人员可以从一组现成的布局策略中进行选择，例如随机、首选本地和基于负载的，或者可以配置自定义逻辑。 这样就可以充分灵活地决定在哪里产生grains。 For example, grains can be placed on a server close to resources which they need to operate on or other grains which they communicate with. For more information see the [Grain Placement](grains/grain_placement.md) documentation.
+当一个Grains在Orleans被激活时，运行时决定在哪个服务器(silos)上激活该Grains。 这叫做Grains安置。 Orleans的布局过程是完全可配置的：开发人员可以从一组现成的布局策略中进行选择，例如随机、首选本地和基于负载的，或者可以配置自定义逻辑。 这样就可以充分灵活地决定在哪里产生grains。 例如，Grains 可以放置在靠近资源的服务器上，靠近他们需要使用的资源或与他们交流的其他Grains。 有关详细信息，请参见[Grains持久化](grains/grain_placement.md)文档。
 
 ### Grains版本化&异构集群
 
@@ -136,11 +136,11 @@ Orleans运行任何支持.NETCore或.NETFramework的地方。 这包括在Linux�
 
 ### Grains拦截器
 
-许多Grains的共同逻辑可以表示为[Grains拦截器](grains/interceptors.md). Orleans支持传入和呼出的过滤器。 Orleans supports filters for both incoming and outgoing calls. 过滤器的一些常见用例有：授权、日志记录和遥测以及错误处理。
+许多Grains的共同逻辑可以表示为[Grains拦截器](grains/interceptors.md)。 Orleans支持用于入站和出站调用的过滤器。 过滤器的一些常见用例有：授权、日志记录和遥测以及错误处理。
 
 ### 请求上下文
 
-元数据和其他信息可以通过使用[请求上下文](grains/request_context.md). 请求上下文可用于打孔分布式跟踪信息或任何其他用户定义的值。 Request context can be used for holding distributed tracing information or any other user-defined values.
+元数据和其他信息可以通过使用[请求上下文](grains/request_context.md). 请求上下文可用于打孔分布式跟踪信息或任何其他用户定义的值。 请求上下文可以用于持有分布式追踪信息或任何其他用户定义的值。
 
 ## 入门
 
@@ -148,7 +148,7 @@ Orleans运行任何支持.NETCore或.NETFramework的地方。 这包括在Linux�
 
 ### 构建
 
-在Windows上，运行`build.cmd`脚本在本地构建NuGet包，然后从中引用所需的NuGet包`/Artifacts/Release/*`. 你可以跑了`Test.cmd`运行所有BVT测试，以及`TestAll.cmd`同时运行功能测试。 You can run `Test.cmd` to run all BVT tests, and `TestAll.cmd` to also run Functional tests.
+在Windows上，运行`build.cmd`脚本在本地构建NuGet包，然后从中引用所需的NuGet包`/Artifacts/Release/*`. 你可以跑了`Test.cmd`运行所有BVT测试，以及`TestAll.cmd`同时运行功能测试。 您可以运行 `Test.cmd` 来运行所有 BVT 测试， `TestAll.cmd` 同时运行功能测试。
 
 在Linux和macOS上，运行`build.sh`脚本或`dotnet build ./OrleansCrossPlatform.sln`构建Orleans。
 
@@ -156,7 +156,7 @@ Orleans运行任何支持.NETCore或.NETFramework的地方。 这包括在Linux�
 
 最新的稳定，生产质量发布[在这里](https://github.com/dotnet/orleans/releases/latest).
 
-夜间生成发布到<https://dotnet.myget.org/gallery/orleans-ci>. 这些构建通过了所有的功能测试，但是没有像发布到NuGet的稳定版本或预发布版本那样进行彻底测试。 These builds pass all functional tests, but are not thoroughly tested as the stable builds or pre-release builds published to NuGet.
+夜间生成发布到<https://dotnet.myget.org/gallery/orleans-ci>. 这些构建通过了所有的功能测试，但是没有像发布到NuGet的稳定版本或预发布版本那样进行彻底测试。 这些构建通过了所有功能测试，但是由于稳定的构建或预发布版本发布到Nuget而没有经过彻底测试。
 
 ### 在项目中使用夜间构建包
 
@@ -208,6 +208,6 @@ Orleans运行任何支持.NETCore或.NETFramework的地方。 这包括在Linux�
 
 ## Orleans的起源
 
-Orleans创建于[微软研究并设计用于云计算](https://www.microsoft.com/en-us/research/publication/orleans-distributed-virtual-actors-for-programmability-and-scalability/). 自2011年以来，它已被多家微软产品集团广泛应用于云计算和内部部署，其中最著名的是游戏工作室，如343 Industries和联盟作为Halo 4和5、Gears of War 4背后的云服务平台，以及其他一些。 Since 2011, it has been used extensively in the cloud and on premises by several Microsoft product groups, most notably by game studios, such as 343 Industries and The Coalition as a platform for cloud services behind Halo 4 and 5, and Gears of War 4, as well as by a number of other companies.
+Orleans创建于[微软研究并设计用于云计算](https://www.microsoft.com/en-us/research/publication/orleans-distributed-virtual-actors-for-programmability-and-scalability/). 自2011年以来，它已被多家微软产品集团广泛应用于云计算和内部部署，其中最著名的是游戏工作室，如343 Industries和联盟作为Halo 4和5、Gears of War 4背后的云服务平台，以及其他一些。 自2011年以来，它已被多个Microsoft产品组广泛用于云中和内部，尤其是游戏工作室（例如343 Industries和The Coalition）作为Halo 4和5，Gears of War 4之后的云服务平台， 也被许多其他公司采用。
 
-Orleans于2015年1月开放源码，吸引了许多开发商成立[是.NET生态系统中最具活力的开源社区之一](http://mattwarren.org/2016/11/23/open-source-net-2-years-later/). 在开发人员社区和微软Orleans团队的积极合作中，每天都会添加和改进特性。 In an active collaboration between the developer community and the Orleans team at Microsoft, features are added and improved on a daily basis. 微软研究院继续与Orleans团队合作，推出新的主要功能，如[地理分布](https://www.microsoft.com/en-us/research/publication/geo-distribution-actor-based-services/), [索引](https://www.microsoft.com/en-us/research/publication/indexing-in-an-actor-oriented-database/)，和[分布式事务](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/)，推动了最新技术的发展。 对于许多.NET开发人员来说，Orleans已经成为构建分布式系统和云服务的首选框架。
+Orleans于2015年1月开放源码，吸引了许多开发商成立[是.NET生态系统中最具活力的开源社区之一](http://mattwarren.org/2016/11/23/open-source-net-2-years-later/). 在开发人员社区和微软Orleans团队的积极合作中，每天都会添加和改进特性。 在开发者社区和Orleans团队微软公司的积极协作下，每天都增加和改进各种功能。 微软研究院继续与Orleans团队合作，推出新的主要功能，如[地理分布](https://www.microsoft.com/en-us/research/publication/geo-distribution-actor-based-services/), [索引](https://www.microsoft.com/en-us/research/publication/indexing-in-an-actor-oriented-database/)，和[分布式事务](https://www.microsoft.com/en-us/research/publication/transactions-distributed-actors-cloud-2/)，推动了最新技术的发展。 对于许多.NET开发人员来说，Orleans已经成为构建分布式系统和云服务的首选框架。
