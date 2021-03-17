@@ -6,7 +6,7 @@ name: Build doc
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ zh-cn ]
 #   pull_request:
 #     branches: [ docs ]
 
@@ -14,7 +14,7 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    name: A job to build docfx doc
+    name: Checkout 🚀
     steps:
     - uses: actions/checkout@v1
    
@@ -23,7 +23,7 @@ jobs:
       
     # ...
     - uses: nikeee/docfx-action@v1.0.0
-      name: Build Documentation
+      name: Build 🚀
       with:
         args: src/docfx.json
 
