@@ -6,6 +6,7 @@
 您可以通过以下地址查看到翻译后发布的最新内容：
 
 https://orleans-zh-cn.github.io/
+https://orleans-cn.gitee.io/
 
 
 # 简单三步，成为贡献者
