@@ -13,6 +13,25 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "canonnk",
+      "name": "canonnk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29003066?v=4",
+      "profile": "https://github.com/canonnk",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "sheng-jie",
+      "name": "Shengjie Yan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12607748?v=4",
+      "profile": "https://www.jianshu.com/u/39ec0e6b1844?order_by=top",
+      "contributions": [
+        "ideas",
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
