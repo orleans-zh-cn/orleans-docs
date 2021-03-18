@@ -36,9 +36,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
+    <td align="center"><a href="https://www.jianshu.com/u/39ec0e6b1844?order_by=top"><img src="https://avatars.githubusercontent.com/u/12607748?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shengjie Yan</b></sub></a><br /><a href="#ideas-sheng-jie" title="Ideas, Planning, & Feedback">🤔</a> <a href="#translation-sheng-jie" title="Translation">🌍</a></td>
+    <td align="center"><a href="http://www.bluetian.net"><img src="https://avatars.githubusercontent.com/u/29353661?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bruce Tian</b></sub></a><br /><a href="#translation-bluetianx" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/oolanlongoo"><img src="https://avatars.githubusercontent.com/u/19584196?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Carl</b></sub></a><br /><a href="#translation-oolanlongoo" title="Translation">🌍</a></td>
     <td align="center"><a href="https://github.com/canonnk"><img src="https://avatars.githubusercontent.com/u/29003066?v=4?s=100" width="100px;" alt=""/><br /><sub><b>canonnk</b></sub></a><br /><a href="#translation-canonnk" title="Translation">🌍</a></td>
-    <td align="center"><a href="https://www.jianshu.com/u/39ec0e6b1844?order_by=top"><img src="https://avatars.githubusercontent.com/u/12607748?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shengjie Yan</b></sub></a><br /><a href="#ideas-sheng-jie" title="Ideas, Planning, & Feedback">🤔</a> <a href="#translation-sheng-jie" title="Translation">🌍</a></td>
   </tr>
 </table>
 

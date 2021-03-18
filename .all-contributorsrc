@@ -6,6 +6,16 @@
   "commit": false,
   "contributors": [
     {
+      "login": "sheng-jie",
+      "name": "Shengjie Yan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12607748?v=4",
+      "profile": "https://www.jianshu.com/u/39ec0e6b1844?order_by=top",
+      "contributions": [
+        "ideas",
+        "translation"
+      ]
+    },
+    {
       "login": "oolanlongoo",
       "name": "Carl",
       "avatar_url": "https://avatars.githubusercontent.com/u/19584196?v=4",
@@ -24,12 +34,11 @@
       ]
     },
     {
-      "login": "sheng-jie",
-      "name": "Shengjie Yan",
-      "avatar_url": "https://avatars.githubusercontent.com/u/12607748?v=4",
-      "profile": "https://www.jianshu.com/u/39ec0e6b1844?order_by=top",
+      "login": "bluetianx",
+      "name": "Bruce Tian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29353661?v=4",
+      "profile": "http://www.bluetian.net",
       "contributions": [
-        "ideas",
         "translation"
       ]
     }
